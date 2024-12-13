@@ -107,7 +107,7 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
         }
       }
     },
-    [payChannel, couponCode]
+    [payChannel]
   );
   const courseId = getStringEnv('courseId');
   const loadPayInfo = useCallback(async () => {
@@ -137,7 +137,7 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
     }
 
     setIsLoading(false);
-  }, [refreshOrderQrcode]);
+  }, [courseId, refreshOrderQrcode]);
 
   const onQrcodeRefresh = useCallback(() => {
     loadPayInfo();

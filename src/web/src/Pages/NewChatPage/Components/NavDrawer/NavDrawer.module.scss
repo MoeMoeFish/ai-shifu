@@ -12,6 +12,7 @@
   .bodyWrapper {
     flex: 1 1 0;
     overflow-y: auto;
+    position: relative;
 
     &::-webkit-scrollbar {
       display: none;

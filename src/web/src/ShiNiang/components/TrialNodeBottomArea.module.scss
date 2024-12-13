@@ -1,0 +1,18 @@
+.trialNodeBottomArea {
+  color: #854c2b;
+  border: 1px solid #d8b582;
+  height: 50px;
+
+  &:hover {
+    color: #854c2b !important; 
+  }
+
+  .buttonContent {
+    .row1 {
+      font-weight: 700;
+    }
+    .row2 {
+      font-size: 0.8em;
+    }
+  }
+}

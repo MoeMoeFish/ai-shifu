@@ -2,7 +2,7 @@
  * 左侧导航控件容器
  */
 import { AppContext } from 'Components/AppContext.js';
-import { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef, memo } from 'react';
 
 import NavHeader from './NavHeader.jsx';
 import NavBody from './NavBody.jsx';
@@ -75,12 +75,19 @@ const NavDrawer = ({
   );
 
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [bodyScrollTop, setBodyScrollTop] = useState(0);
+  const [bodyHeight, setBodyHeight] = useState(0);
 
   const alwaysShowLessonTree = getBoolEnv('alwaysShowLessonTree');
   const footerRef = useRef(null);
+  const bodyRef = useRef(null);
 
   const onHeaderCloseClick = () => {
   };
+
+  const onBodyScroll = (e) => {
+    setBodyScrollTop(e.target.scrollTop);
+  }
 
   const onHeaderToggleClick = ({ isCollapse }) => {
     setIsCollapse(isCollapse);
@@ -113,7 +120,7 @@ const NavDrawer = ({
           isCollapse={isCollapse}
           mobileStyle={mobileStyle}
         />
-        <div className={styles.bodyWrapper}>
+        <div className={styles.bodyWrapper} onScroll={onBodyScroll} ref={bodyRef} >
           {!isCollapse &&
             (hasLogin || alwaysShowLessonTree ? (
               <CourseCatalogList
@@ -123,6 +130,9 @@ const NavDrawer = ({
                 onChapterCollapse={onChapterCollapse}
                 onLessonSelect={onLessonSelect}
                 onTryLessonSelect={onTryLessonSelect}
+                containerScrollTop={bodyScrollTop}
+                containerHeight={bodyRef.current?.clientHeight || 0}
+                bannerInfo={lessonTree?.bannerInfo}
               />
             ) : (
               <NavBody onLoginClick={onLoginClick} />
@@ -188,4 +198,4 @@ const NavDrawer = ({
   );
 };
 
-export default NavDrawer;
+export default memo(NavDrawer) ;

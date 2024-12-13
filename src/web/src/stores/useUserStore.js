@@ -5,8 +5,10 @@ import { genUuid } from 'Utils/common.js';
 import { verifySmsCode } from 'Api/user.js';
 import { subscribeWithSelector } from 'zustand/middleware';
 import i18n from '../i18n.js';
+
 export const useUserStore = create(
   subscribeWithSelector((set) => ({
+    hasCheckLogin: false,
     hasLogin: false,
     userInfo: null,
 
@@ -23,8 +25,7 @@ export const useUserStore = create(
 
     },
 
-    // 通过接口检测登录状态
-    checkLogin: async () => {
+    checkLoginForce: async () => {
       if (!tokenTool.get().token) {
         const res = await registerTmp({ temp_id: genUuid() });
         const token = res.data.token;
@@ -32,16 +33,17 @@ export const useUserStore = create(
         set(() => ({
           hasLogin: false,
           userInfo: null,
+          hasCheckLogin: true,
         }));
         return;
       }
-
 
       if (userInfoStore.get()) {
         set(() => ({
           userInfo: userInfoStore.get(),
         }));
       }
+
       try {
         const res = await getUserInfo();
         const userInfo = res.data;
@@ -49,12 +51,14 @@ export const useUserStore = create(
         await userInfoStore.set(userInfo);
         if (userInfo.mobile) {
           set(() => ({
+            hasCheckLogin: true,
             hasLogin: true,
             userInfo,
           }));
         } else {
           await tokenTool.set({ token: tokenTool.get().token, faked: true });
           set(() => ({
+            hasCheckLogin: true,
             hasLogin: false,
             userInfo: userInfo,
           }));
@@ -67,12 +71,22 @@ export const useUserStore = create(
           await tokenTool.set({ token, faked: true });
 
           set(() => ({
+            hasCheckLogin: true,
             hasLogin: false,
             userInfo: null,
           }));
         }
       }
     },
+
+    // 通过接口检测登录状态
+    checkLogin: () => set(async (state) => {
+      console.log('checkLogin', state.hasCheckLogin)
+      if (state.hasCheckLogin) {
+        return
+      }
+      state.checkLoginForce();
+    }),
 
     logout: async () => {
       const res = await registerTmp({ temp_id: genUuid() });

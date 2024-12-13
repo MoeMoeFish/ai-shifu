@@ -26,6 +26,7 @@ export const INTERACTION_TYPE = {
   ORDER: 'order', // 购买课程
   ASK: 'ask', // 追问
   REQUIRE_LOGIN: 'require_login', // 需要登录
+  NONBLOCK_ORDER: 'nonblock_order', // 可以继续的购买框   
 };
 
 // 交互组件的输出类型
@@ -38,6 +39,7 @@ export const INTERACTION_OUTPUT_TYPE = {
   PHONE: 'phone', // 输入手机号
   CHECKCODE: 'checkcode', // 输入短信验证码
   ORDER: 'order', // 购买课程
+  NONBLOCK_ORDER: 'nonblock_order', // 可以继续的购买框   
   ASK: 'ask', // 追问
   REQUIRE_LOGIN: 'require_login', // 需要登录
   LOGIN: 'login', // 登录
@@ -54,6 +56,7 @@ export const RESP_EVENT_TYPE = {
   PHONE: 'phone', // 输入手机号
   CHECKCODE: 'checkcode', // 输入短信验证码
   ORDER: 'order', // 购买课程
+  NONBLOCK_ORDER: 'nonblock_order', // 可以继续的购买框   
   ORDER_SUCCESS: 'order_success',
   USER_LOGIN: 'user_login', // 用户登录成功
   PROFILE_UPDATE: 'profile_update', // 用户信息更新

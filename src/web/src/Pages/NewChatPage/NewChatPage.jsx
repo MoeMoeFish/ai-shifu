@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useEffectOnce } from 'react-use';
 import { useParams } from 'react-router-dom';
 import classNames from 'classnames';
 import styles from './NewChatPage.module.scss';
@@ -25,6 +24,8 @@ import { updateWxcode } from 'Api/user.js';
 import FeedbackModal from './Components/FeedbackModal/FeedbackModal.jsx';
 import { useTranslation } from 'react-i18next';
 import { useEnvStore } from 'stores/envStore.js';
+import { shifu } from 'Service/Shifu.js';
+
 // the main page of course learning
 const NewChatPage = (props) => {
   const { frameLayout, updateFrameLayout } = useUiLayoutStore((state) => state);
@@ -32,13 +33,13 @@ const NewChatPage = (props) => {
   const [initialized, setInitialized] = useState(false);
   const { hasLogin, userInfo, checkLogin } = useUserStore((state) => state);
   const [language, setLanguage] = useState(userInfo?.language || 'en-US');
+
   const {
     tree,
     loadTree,
     reloadTree,
     updateSelectedLesson,
     toggleCollapse,
-    checkChapterAvaiableStatic,
     getCurrElementStatic,
     updateLesson,
     updateChapterStatus,
@@ -49,11 +50,14 @@ const NewChatPage = (props) => {
   const { lessonId, changeCurrLesson, chapterId, updateChapterId } =
     useCourseStore((state) => state);
   const [showUserSettings, setShowUserSettings] = useState(false);
-  const { open: feedbackModalOpen, onOpen: onFeedbackModalOpen, onClose: onFeedbackModalClose } = useDisclosture();
+  const {
+    open: feedbackModalOpen,
+    onOpen: onFeedbackModalOpen,
+    onClose: onFeedbackModalClose,
+  } = useDisclosture();
   const { i18n } = useTranslation();
 
   const mobileStyle = frameLayout === FRAME_LAYOUT_MOBILE;
-
 
   const {
     open: navOpen,
@@ -111,6 +115,7 @@ const NewChatPage = (props) => {
   }, [loadTree]);
 
   const initAndCheckLogin = useCallback(async () => {
+    console.log('initAndCheckLogin');
     await checkLogin();
     if (inWechat()) {
       await updateWxcode();
@@ -127,10 +132,22 @@ const NewChatPage = (props) => {
     }
   }, [cid, chapterId, updateChapterId]);
 
-  useEffectOnce(() => {
+  useEffect(() => {
     (async () => {
       await initAndCheckLogin();
     })();
+  }, [initAndCheckLogin]);
+
+  // listen golbal event
+  useEffect(() => {
+    const eventHandler = () => {
+      setLoginModalOpen(true);
+    }
+    shifu.events.addEventListener(shifu.EventTypes.OPEN_LOGIN_MODAL, eventHandler);
+
+    return () => {
+      shifu.events.removeEventListener(shifu.EventTypes.OPEN_LOGIN_MODAL, eventHandler);
+    }
   });
 
 

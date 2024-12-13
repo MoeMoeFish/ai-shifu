@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { getLessonTree } from 'Api/lesson.js';
 import { produce } from 'immer';
-import { LESSON_STATUS_VALUE} from "constants/courseConstants.js";
+import { LESSON_STATUS_VALUE } from "constants/courseConstants.js";
 import { useTracking, EVENT_NAMES } from "common/hooks/useTracking.js";
 import { useUserStore } from 'stores/useUserStore.js';
 import { useEnvStore } from 'stores/envStore.js';
+import { useCallback } from "react";
 export const checkChapterCanLearning = ({ status }) => {
   return status === LESSON_STATUS_VALUE.LEARNING || status === LESSON_STATUS_VALUE.COMPLETED || status === LESSON_STATUS_VALUE.PREPARE_LEARNING;
 };
@@ -21,14 +22,14 @@ export const checkChapterAvaiableStatic = (tree, chapterId) => {
   return catalog.status_value === LESSON_STATUS_VALUE.LEARNING || catalog.status_value === LESSON_STATUS_VALUE.COMPLETED || catalog.status_value === LESSON_STATUS_VALUE.PREPARE_LEARNING;
 };
 
-const getCurrElementStatic = async(tree) => {
+const getCurrElementStatic = async (tree) => {
   for (const catalog of tree.catalogs) {
     const lesson = catalog.lessons.find(v => v.selected === true);
     if (lesson) {
       return { catalog, lesson };
     }
   }
-  return {catalog:null,lesson:null};
+  return { catalog: null, lesson: null };
 };
 
 export const initialSelectedChapter = (tree) => {
@@ -48,13 +49,14 @@ export const initialSelectedChapter = (tree) => {
 export const useLessonTree = () => {
   const { trackEvent } = useTracking();
   const [tree, setTree] = useState(null);
-  const { checkLogin } = useUserStore();
+  const { checkLogin, hasCheckLogin } = useUserStore();
   const { updateCourseId } = useEnvStore.getState();
-  const loadTreeInner = async () => {
+  const loadTreeInner = useCallback(async () => {
     let resp;
     try {
       resp = await getLessonTree(useEnvStore.getState().courseId);
     } catch (err) {
+      console.log('use Lesson Tree');
       await checkLogin();
       resp = await getLessonTree(useEnvStore.getState().courseId);
     }
@@ -74,7 +76,7 @@ export const useLessonTree = () => {
           id: c.lesson_id,
           name: c.lesson_name,
           status: c.status,
-          status_value:c.status_value,
+          status_value: c.status_value,
           canLearning: checkChapterCanLearning(c),
         };
       });
@@ -83,9 +85,10 @@ export const useLessonTree = () => {
         id: l.lesson_id,
         name: l.lesson_name,
         status: l.status,
-        status_value:l.status_value,
+        status_value: l.status_value,
         lessons,
         collapse: false,
+        bannerInfo: l.banner_info,
       };
     });
 
@@ -93,9 +96,10 @@ export const useLessonTree = () => {
       catalogCount: catalogs.length,
       catalogs,
       lessonCount,
+      bannerInfo: treeData.banner_info,
     };
     return newTree;
-  };
+  }, [checkLogin, updateCourseId]);
 
   const clearSelectedStateStatic = (tree) => {
     tree.catalogs.forEach(c => {
@@ -105,7 +109,7 @@ export const useLessonTree = () => {
     });
   };
 
-  const setSelectedStateStatic = (tree, chapterId, lessonId) => {
+  const setSelectedStateStatic = useCallback((tree, chapterId, lessonId) => {
     let selectedCorrect = false;
     const chapter = tree.catalogs.find(v => v.id === chapterId);
     if (!chapter) {
@@ -130,10 +134,10 @@ export const useLessonTree = () => {
     selectedCorrect = true;
 
     return selectedCorrect;
-  };
+  }, []);
 
   // 用于重新加载课程树，但保持临时状态
-  const reloadTree = async (chapterId = 0, lessonId = 0) => {
+  const reloadTree = useCallback(async (chapterId = 0, lessonId = 0) => {
     const newTree = await loadTreeInner();
     const { lesson } = await getCurrElementStatic(tree);
     const selected = setSelectedStateStatic(newTree, chapterId, lessonId);
@@ -157,9 +161,9 @@ export const useLessonTree = () => {
     });
     setTree(newTree);
     return newTree;
-  };
+  }, [loadTreeInner, setSelectedStateStatic, tree]);
 
-  const loadTree = async (chapterId = 0, lessonId = 0) => {
+  const loadTree = useCallback(async (chapterId = 0, lessonId = 0) => {
     const newTree = await loadTreeInner();
     const selected = setSelectedStateStatic(newTree, chapterId, lessonId);
     if (!selected) {
@@ -168,7 +172,7 @@ export const useLessonTree = () => {
     setTree(newTree);
 
     return newTree;
-  };
+  }, [loadTreeInner, setSelectedStateStatic]);
 
   const updateSelectedLesson = async (lessonId, forceExpand = false) => {
     setTree(old => {
@@ -253,7 +257,7 @@ export const useLessonTree = () => {
     });
   };
 
-  const updateChapterStatus = (id, { status,status_value }) => {
+  const updateChapterStatus = (id, { status, status_value }) => {
     setTree(old => {
       if (!old) {
         return;

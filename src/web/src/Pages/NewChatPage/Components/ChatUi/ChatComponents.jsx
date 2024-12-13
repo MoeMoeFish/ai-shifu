@@ -34,15 +34,15 @@ import MarkdownBubble from './ChatMessage/MarkdownBubble.jsx';
 import { useTracking, EVENT_NAMES } from 'common/hooks/useTracking.js';
 import PayModalM from '../Pay/PayModalM.jsx';
 import { smoothScroll } from 'Utils/smoothScroll.js';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useEnvStore } from 'stores/envStore.js';
+import { shifu } from 'Service/Shifu.js';
+import { use } from 'react';
+
 const USER_ROLE = {
   TEACHER: '老师',
   STUDENT: '学生',
 };
-
-
-
 
 const robotAvatar = 'https://avtar.agiclass.cn/sunner.jpg';
 
@@ -65,7 +65,7 @@ const createMessage = ({
   }
   const position = role === USER_ROLE.STUDENT ? 'right' : 'left';
 
-  let avatar = teach_avator ||  robotAvatar;
+  let avatar = teach_avator || robotAvatar;
 
   if (role === USER_ROLE.STUDENT) {
     avatar = null;
@@ -119,12 +119,15 @@ const convertEventInputModal = ({ type, content }) => {
   } else if (
     type === RESP_EVENT_TYPE.BUTTONS ||
     type === RESP_EVENT_TYPE.ORDER ||
+    type === RESP_EVENT_TYPE.NONBLOCK_ORDER ||
     type === RESP_EVENT_TYPE.REQUIRE_LOGIN
   ) {
-
     const getBtnType = (type) => {
       if (type === INTERACTION_TYPE.ORDER) {
         return INTERACTION_TYPE.ORDER;
+      }
+      if (type === INTERACTION_TYPE.NONBLOCK_ORDER) {
+        return INTERACTION_TYPE.NONBLOCK_ORDER;
       }
       if (type === RESP_EVENT_TYPE.REQUIRE_LOGIN) {
         return INTERACTION_TYPE.REQUIRE_LOGIN;
@@ -182,6 +185,7 @@ export const ChatComponents = forwardRef(
     const [askMode, setAskMode] = useState(false);
 
     const { userInfo, mobileStyle } = useContext(AppContext);
+
     const chatRef = useRef();
     const {
       lessonId: currLessonId,
@@ -210,6 +214,7 @@ export const ChatComponents = forwardRef(
       onClose: onPayModalClose,
     } = useDisclosture();
 
+
     const {
       open: loginModalOpen,
       onOpen: onLoginModalOpen,
@@ -225,6 +230,35 @@ export const ChatComponents = forwardRef(
       onLoginModalClose();
       setInputDisabled(false);
     }, [onLoginModalClose]);
+
+    // action control is register in plugin
+    const [showActionControl, setShowActionControl] = useState(false);
+    const [actionControlType, setActionControlType] = useState('');
+    const [actionControlPayload, setActionControlPayload] = useState({
+      type: '',
+      val: '',
+      scriptId: '',
+    });
+
+    const closeActionControl = useCallback(() => {
+      setShowActionControl(false);
+    }, []);
+
+    const onActionControlComplete = (type, val, scriptId) => {
+      closeActionControl();
+      handleSend(actionControlType, val, scriptId);
+    };
+
+    const getActionControl = () => {
+      const Control = shifu.getChatInputActionControls(actionControlType);
+      return (
+        <Control
+          onClose={closeActionControl}
+          payload={actionControlPayload}
+          onComplete={onActionControlComplete}
+        ></Control>
+      );
+    };
 
     useEffect(() => {
       setLessonId(currLessonId);
@@ -243,10 +277,13 @@ export const ChatComponents = forwardRef(
           id: content.lesson_id,
           name: content.lesson_name,
           status: content.status,
-          status_value:content.status_value
+          status_value: content.status_value,
         });
 
-        if (content.status_value === LESSON_STATUS_VALUE.PREPARE_LEARNING && !isEnd) {
+        if (
+          content.status_value === LESSON_STATUS_VALUE.PREPARE_LEARNING &&
+          !isEnd
+        ) {
           nextStepFunc({
             chatId,
             lessonId: content.lesson_id,
@@ -275,7 +312,6 @@ export const ChatComponents = forwardRef(
             isEnd = v;
             return v;
           });
-
 
           if (response.type === RESP_EVENT_TYPE.TEACHER_AVATOR) {
             teach_avator = response.content;
@@ -340,6 +376,7 @@ export const ChatComponents = forwardRef(
             } else if (
               response.type === RESP_EVENT_TYPE.BUTTONS ||
               response.type === RESP_EVENT_TYPE.ORDER ||
+              response.type === RESP_EVENT_TYPE.NONBLOCK_ORDER||
               response.type === RESP_EVENT_TYPE.REQUIRE_LOGIN
             ) {
               if (isEnd) {
@@ -351,8 +388,12 @@ export const ChatComponents = forwardRef(
             } else if (response.type === RESP_EVENT_TYPE.LESSON_UPDATE) {
               lessonUpdateResp(response, isEnd, nextStep);
             } else if (response.type === RESP_EVENT_TYPE.CHAPTER_UPDATE) {
-              const { status,status_value, lesson_id: chapterId } = response.content;
-              chapterUpdate?.({ id: chapterId, status,status_value });
+              const {
+                status,
+                status_value,
+                lesson_id: chapterId,
+              } = response.content;
+              chapterUpdate?.({ id: chapterId, status, status_value });
               if (status_value === LESSON_STATUS_VALUE.COMPLETED) {
                 isEnd = true;
                 setLessonEnd(true);
@@ -504,7 +545,7 @@ export const ChatComponents = forwardRef(
       if (ui) {
         initLoadedInteraction(ui);
       }
-      setAskMode(resp.data?.ask_mode)
+      setAskMode(resp.data?.ask_mode);
       setLoadedData(true);
       setLoadedChapterId(chapterId);
     }, [
@@ -595,6 +636,7 @@ export const ChatComponents = forwardRef(
 
     const handleSend = useCallback(
       async (type, val, scriptId) => {
+        console.log('handleSend', type, val, scriptId)
         if (
           (type === INTERACTION_OUTPUT_TYPE.TEXT ||
             type === INTERACTION_OUTPUT_TYPE.SELECT ||
@@ -690,10 +732,32 @@ export const ChatComponents = forwardRef(
           onPayModalOpen();
           return;
         }
+
         if (type === INTERACTION_OUTPUT_TYPE.REQUIRE_LOGIN) {
           setInputDisabled(true);
           trackEvent(EVENT_NAMES.POP_LOGIN, { from: 'script', way: 'manual' });
           onLoginModalOpen();
+          return;
+        }
+
+        if (
+          !(
+            type === INTERACTION_OUTPUT_TYPE.TEXT ||
+            type === INTERACTION_OUTPUT_TYPE.SELECT ||
+            type === INTERACTION_OUTPUT_TYPE.CONTINUE ||
+            type === INTERACTION_OUTPUT_TYPE.PHONE ||
+            type === INTERACTION_OUTPUT_TYPE.CHECKCODE ||
+            type === INTERACTION_OUTPUT_TYPE.LOGIN ||
+            type === INTERACTION_OUTPUT_TYPE.ASK
+          )
+        ) {
+          setShowActionControl(true);
+          setActionControlType(type);
+          setActionControlPayload({
+            type,
+            val,
+            scriptId,
+          });
           return;
         }
 
@@ -720,8 +784,7 @@ export const ChatComponents = forwardRef(
     const onLogin = useCallback(async () => {
       await refreshUserInfo();
       handleSend(INTERACTION_OUTPUT_TYPE.LOGIN, t('chat.loginSuccess'));
-
-    }, [handleSend, refreshUserInfo,t]);
+    }, [handleSend, refreshUserInfo, t]);
 
     return (
       <div
@@ -770,8 +833,13 @@ export const ChatComponents = forwardRef(
             />
           ))}
         {loginModalOpen && (
-          <LoginModal open={loginModalOpen} onClose={_onLoginModalClose} onLogin={onLogin} />
+          <LoginModal
+            open={loginModalOpen}
+            onClose={_onLoginModalClose}
+            onLogin={onLogin}
+          />
         )}
+        {showActionControl && getActionControl()}
       </div>
     );
   }
