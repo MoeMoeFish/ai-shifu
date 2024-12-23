@@ -27,6 +27,11 @@
       color: var(--color-4);
     }
 
+    :global(.Message[data-type=lessonSeparator]) {
+      height: 0;
+      overflow: hidden;
+    }
+
     :global(.Message.left) {
       color: var(--font-color-main);
       font-size: var(--font-size-3);
@@ -114,7 +119,6 @@
           border-bottom-right-radius: 16px;
         }
       }
-
 
       :global(td) {
         padding: 15px;

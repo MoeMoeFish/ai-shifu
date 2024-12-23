@@ -55,6 +55,7 @@ const createMessage = ({
   teach_avator,
 }) => {
   const mid = id || genUuid();
+  console.log('createMessage', type);
   if (type === CHAT_MESSAGE_TYPE.LESSON_SEPARATOR) {
     return {
       _id: mid,
@@ -180,11 +181,12 @@ export const ChatComponents = forwardRef(
     const [loadedData, setLoadedData] = useState(false);
     const [isStreaming, setIsStreaming] = useState(false);
     const [initRecords, setInitRecords] = useState([]);
-
+    // lesson id the current message is belong to
+    const [messageLessonId, setMessageLessonId] = useState('');
     const [autoScroll, setAutoScroll] = useState(true);
     const [askMode, setAskMode] = useState(false);
-
     const { userInfo, mobileStyle } = useContext(AppContext);
+
 
     const chatRef = useRef();
     const {
@@ -213,7 +215,6 @@ export const ChatComponents = forwardRef(
       onOpen: onPayModalOpen,
       onClose: onPayModalClose,
     } = useDisclosture();
-
 
     const {
       open: loginModalOpen,
@@ -376,7 +377,7 @@ export const ChatComponents = forwardRef(
             } else if (
               response.type === RESP_EVENT_TYPE.BUTTONS ||
               response.type === RESP_EVENT_TYPE.ORDER ||
-              response.type === RESP_EVENT_TYPE.NONBLOCK_ORDER||
+              response.type === RESP_EVENT_TYPE.NONBLOCK_ORDER ||
               response.type === RESP_EVENT_TYPE.REQUIRE_LOGIN
             ) {
               if (isEnd) {
@@ -410,7 +411,10 @@ export const ChatComponents = forwardRef(
                 setInputDisabled(false);
               }
             } else if (response.type === RESP_EVENT_TYPE.USER_LOGIN) {
-              await tokenTool.set({ token: response.content.token, faked: true });
+              await tokenTool.set({
+                token: response.content.token,
+                faked: true,
+              });
               checkLogin();
             } else if (response.type === RESP_EVENT_TYPE.PROFILE_UPDATE) {
               const content = response.content;
@@ -523,20 +527,29 @@ export const ChatComponents = forwardRef(
       const ui = resp.data?.ui || null;
 
       if (records && records.length > 0) {
+        let lessonId = '';
+
         records.forEach((v, i) => {
-          if (v.script_type === CHAT_MESSAGE_TYPE.LESSON_SEPARATOR) {
-          } else {
-            const newMessage = convertMessage(
-              {
-                ...v,
-                id: i,
-                script_type: CHAT_MESSAGE_TYPE.TEXT,
-              },
-              userInfo,
-              teach_avator
-            );
-            appendMsg(newMessage);
+          const newLessonId = v.lesson_id;
+          if (newLessonId !== lessonId) {
+            lessonId = newLessonId;
+            setMessageLessonId(newLessonId);
+            appendMsg(convertMessage({
+              ...v,
+              id: `lesson-${newLessonId}`,
+              script_type: CHAT_MESSAGE_TYPE.LESSON_SEPARATOR,
+            }));
           }
+          const newMessage = convertMessage(
+            {
+              ...v,
+              id: i,
+              script_type: CHAT_MESSAGE_TYPE.TEXT,
+            },
+            userInfo,
+            teach_avator
+          );
+          appendMsg(newMessage);
         });
 
         setLessonId(records[records.length - 1].lesson_id);
@@ -636,7 +649,7 @@ export const ChatComponents = forwardRef(
 
     const handleSend = useCallback(
       async (type, val, scriptId) => {
-        console.log('handleSend', type, val, scriptId)
+        console.log('handleSend', type, val, scriptId);
         if (
           (type === INTERACTION_OUTPUT_TYPE.TEXT ||
             type === INTERACTION_OUTPUT_TYPE.SELECT ||
