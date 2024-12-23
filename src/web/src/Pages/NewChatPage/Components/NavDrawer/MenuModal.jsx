@@ -16,7 +16,9 @@ const MenuModal = ({
         className={className}
     >
       <div className={`${styles.menuModal} ${styles.popupModalContainer}`}>
-        <div className={styles.popupModalRow}></div>
+        <div className={styles.popupModalRow}>
+          
+        </div>
       </div>
     </PopupModal>
   );
