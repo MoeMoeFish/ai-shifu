@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { isMobile } from 'react-device-detect';
 import { calcFrameLayout } from '@constants/uiConstants.js';
+import { FRAME_LAYOUT_MOBILE } from 'constants/uiConstants.js';
 
 export const useUiLayoutStore = create((set) => ({
   frameLayout: calcFrameLayout('#root'),

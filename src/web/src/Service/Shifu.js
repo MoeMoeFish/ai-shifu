@@ -2,6 +2,7 @@ import { useUserStore } from "stores/useUserStore.js";
 import { useUiLayoutStore } from "stores/useUiLayoutStore.js";
 import { tokenTool } from "./storeUtil.js";
 import { FRAME_LAYOUT_MOBILE } from 'constants/uiConstants.js';
+import { utils } from './shifuUtils.js';
 
 const createShifu = () => {
   const chatInputActionControls = {}
@@ -73,6 +74,7 @@ const createShifu = () => {
       registerChatInputActionControls,
       registerControl,
       openLogin,
+      utils,
     })
   }
 
@@ -90,6 +92,7 @@ const createShifu = () => {
     getControl,
     hasControl,
     openLogin,
+    utils,
   }
 }
 

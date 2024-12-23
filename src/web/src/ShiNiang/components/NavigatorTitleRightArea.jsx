@@ -12,12 +12,17 @@ import { shifu } from 'ShiNiang/config/config';
 import { usePayStore } from 'ShiNiang/stores/usePayStore.js';
 
 export const ControlType = 'navigator_top_area';
+
 const NavigatorTitleRightArea = ({ payload }) => {
   const { hasPay, updateHasPay } = usePayStore(
     useShallow((state) => ({
       hasPay: state.hasPay,
       updateHasPay: state.updateHasPay,
     }))
+  );
+
+  const { frameLayout } = shifu.stores.useUiLayoutStore(
+    useShallow((state) => ({ frameLayout: state.frameLayout }))
   );
 
   const {
@@ -44,6 +49,8 @@ const NavigatorTitleRightArea = ({ payload }) => {
     onModalOpen();
     onPopoverClose();
   };
+
+  const popoverLocation = shifu.utils.checkMobileStyle(frameLayout) ? 'bottom' : 'rightTop';
 
   const getPopoverContent = () => {
     return (
@@ -100,7 +107,7 @@ const NavigatorTitleRightArea = ({ payload }) => {
           rootClassName={styles.navigatorTitleRightAreaPopover}
           content={getPopoverContent()}
           open={popoverOpen}
-          placement="rightTop"
+          placement={popoverLocation}
         >
           <ConfigProvider
             theme={{
