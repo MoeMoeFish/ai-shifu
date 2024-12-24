@@ -279,6 +279,7 @@ const NewChatPage = (props) => {
           <ChatMobileHeader
             navOpen={navOpen}
             className={styles.chatMobileHeader}
+            iconPopoverPayload={tree?.bannerInfo}
             onSettingClick={onNavToggle}
           />
         )}

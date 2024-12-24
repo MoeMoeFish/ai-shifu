@@ -2,14 +2,13 @@ import { memo, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { Button, Popover, ConfigProvider } from 'antd';
 import { useDisclosture } from 'ShiNiang/common/hooks/useDisclosture.js';
-import MainButton from 'ShiNiang/components/MainButton.jsx';
 import styles from './NavigatorTitleRightArea.module.scss';
 import { customEvents, EVENT_TYPE } from 'ShiNiang/events/event.js';
-import { TrophyTwoTone } from '@ant-design/icons';
 import PayModal from 'Pages/NewChatPage/Components/Pay/PayModal.jsx';
 import PayModalM from 'Pages/NewChatPage/Components/Pay/PayModalM.jsx';
 import { shifu } from 'ShiNiang/config/config';
 import { usePayStore } from 'ShiNiang/stores/usePayStore.js';
+import OrderPromotePopoverContent from './OrderPromotePopoverContent.jsx';
 
 export const ControlType = 'navigator_top_area';
 
@@ -52,37 +51,6 @@ const NavigatorTitleRightArea = ({ payload }) => {
 
   const popoverLocation = shifu.utils.checkMobileStyle(frameLayout) ? 'bottom' : 'rightTop';
 
-  const getPopoverContent = () => {
-    return (
-      <div className={styles.popoverContent}>
-        <div className={styles.leftColumn}>
-          <TrophyTwoTone style={{ fontSize: '1.5em' }} twoToneColor="#E99D42" />
-        </div>
-        <div className={styles.rightColumn}>
-          <div className={styles.descRow1}>{payload.pop_up_title}</div>
-          <div className={styles.descRow2}>{payload.pop_up_content}</div>
-          <div className={styles.buttonRow}>
-            <Button
-              type="default"
-              onClick={onPopoverClose}
-              style={{ height: 26 }}
-            >
-              {payload.pop_up_cancel_text}
-            </Button>
-            <MainButton
-              className={styles.payBtn}
-              onClick={onUnlockAllClick}
-              shape="default"
-              height={26}
-            >
-              {payload.pop_up_confirm_text}
-            </MainButton>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   useEffect(() => {
     const onEventHandler = () => {
       onPopoverOpen();
@@ -105,7 +73,13 @@ const NavigatorTitleRightArea = ({ payload }) => {
       {!hasPay ? (
         <Popover
           rootClassName={styles.navigatorTitleRightAreaPopover}
-          content={getPopoverContent()}
+          content={
+            <OrderPromotePopoverContent
+              payload={payload}
+              onCancelButtonClick={onPopoverClose}
+              onOkButtonClick={onUnlockAllClick}
+            />
+          }
           open={popoverOpen}
           placement={popoverLocation}
         >

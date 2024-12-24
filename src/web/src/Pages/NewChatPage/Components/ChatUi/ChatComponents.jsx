@@ -55,7 +55,6 @@ const createMessage = ({
   teach_avator,
 }) => {
   const mid = id || genUuid();
-  console.log('createMessage', type);
   if (type === CHAT_MESSAGE_TYPE.LESSON_SEPARATOR) {
     return {
       _id: mid,

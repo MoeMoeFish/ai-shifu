@@ -16,6 +16,7 @@ const createShifu = () => {
   const ControlTypes = {
     NAVIGATOR_TITLE_RIGHT_AREA: 'NAVIGATOR_TITLE_RIGHT_AREA',
     TRIAL_NODE_BOTTOM_AREA: 'TRIAL_NODE_BOTTOM_AREA',
+    MOBILE_HEADER_ICON_POPOVER: 'MOBILE_HEADER_ICON_POPOVER',
   }
 
   const getConfig = () => {
