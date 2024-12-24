@@ -51,6 +51,7 @@ export const useLessonTree = () => {
   const [tree, setTree] = useState(null);
   const { checkLogin, hasCheckLogin } = useUserStore();
   const { updateCourseId } = useEnvStore.getState();
+
   const loadTreeInner = useCallback(async () => {
     let resp;
     try {

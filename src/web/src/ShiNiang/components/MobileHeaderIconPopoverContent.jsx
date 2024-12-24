@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import styles from './MobileHeaderIconPopoverContent.module.scss';
 import { useShallow } from 'zustand/react/shallow';
 import { customEvents, EVENT_TYPE } from 'ShiNiang/events/event.js';
 import { usePayStore } from 'ShiNiang/stores/usePayStore.js';
@@ -33,7 +34,6 @@ const MobileHeaderIconPopoverContent = ({ payload, onClose, onOpen }) => {
   useEffect(() => {
     const onEventHandler = () => {
       onOpen?.();
-      console.log('MobileHeaderIconPopoverContent.onEventHandler')
     };
 
     customEvents.addEventListener(
@@ -41,7 +41,6 @@ const MobileHeaderIconPopoverContent = ({ payload, onClose, onOpen }) => {
       onEventHandler
     );
 
-    console.log('MobileHeaderIconPopoverContent.useEffect.addEventListener')
     return () => {
       customEvents.removeEventListener(
         EVENT_TYPE.NON_BLOCK_PAY_MODAL_CLOSED,
@@ -59,6 +58,7 @@ const MobileHeaderIconPopoverContent = ({ payload, onClose, onOpen }) => {
           onModalOpen();
           onClose?.();
         }}
+        className={styles.mobileHeaderIconPopoverContent}
       />
 
       {!hasPay &&

@@ -31,7 +31,7 @@ const NewChatPage = (props) => {
   const { frameLayout, updateFrameLayout } = useUiLayoutStore((state) => state);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const { hasLogin, userInfo, checkLogin } = useUserStore((state) => state);
+  const { hasLogin, userInfo, checkLogin, hasCheckLogin } = useUserStore((state) => state);
   const [language, setLanguage] = useState(userInfo?.language || 'en-US');
 
   const {
@@ -46,7 +46,7 @@ const NewChatPage = (props) => {
     getChapterByLesson,
     onTryLessonSelect,
   } = useLessonTree();
-  const [cid, setCid] = useState(null)
+  const [cid, setCid] = useState(null);
   const { lessonId, changeCurrLesson, chapterId, updateChapterId } =
     useCourseStore((state) => state);
   const [showUserSettings, setShowUserSettings] = useState(false);
@@ -93,36 +93,35 @@ const NewChatPage = (props) => {
   }, [courseId, updateCourseId]);
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (tree) {
-        const data = await getCurrElementStatic(tree);
-        if (data) {
-          changeCurrLesson(data.lesson.id);
-          if (data.catalog && (!cid || cid !== data.catalog.id)) {
-            setCid(data.catalog.id);
-          }
+  const fetchData = useCallback( async () => {
+    if (tree) {
+      const data = await getCurrElementStatic(tree);
+      if (data) {
+        changeCurrLesson(data.lesson.id);
+        if (data.catalog && (!cid || cid !== data.catalog.id)) {
+          setCid(data.catalog.id);
         }
       }
-    };
+    }
+  }, [changeCurrLesson, cid, getCurrElementStatic, tree]);
 
-    fetchData();
-  }, [tree, changeCurrLesson, cid, setCid, getCurrElementStatic]);
-
+  useEffect(() => {
+    if (hasCheckLogin) {
+      fetchData();
+    }
+  }, [fetchData, hasCheckLogin]);
 
   const loadData = useCallback(async () => {
     await loadTree();
   }, [loadTree]);
 
   const initAndCheckLogin = useCallback(async () => {
-    console.log('initAndCheckLogin');
-    await checkLogin();
+    checkLogin();
     if (inWechat()) {
       await updateWxcode();
     }
     setInitialized(true);
   }, [checkLogin]);
-
 
   useEffect(() => {
     if (cid === chapterId) {
@@ -134,22 +133,29 @@ const NewChatPage = (props) => {
 
   useEffect(() => {
     (async () => {
-      await initAndCheckLogin();
+      if (!hasCheckLogin) {
+        await initAndCheckLogin();
+      }
     })();
-  }, [initAndCheckLogin]);
+  }, [hasCheckLogin, initAndCheckLogin]);
 
-  // listen golbal event
+  // listen global event
   useEffect(() => {
     const eventHandler = () => {
       setLoginModalOpen(true);
-    }
-    shifu.events.addEventListener(shifu.EventTypes.OPEN_LOGIN_MODAL, eventHandler);
+    };
+    shifu.events.addEventListener(
+      shifu.EventTypes.OPEN_LOGIN_MODAL,
+      eventHandler
+    );
 
     return () => {
-      shifu.events.removeEventListener(shifu.EventTypes.OPEN_LOGIN_MODAL, eventHandler);
-    }
+      shifu.events.removeEventListener(
+        shifu.EventTypes.OPEN_LOGIN_MODAL,
+        eventHandler
+      );
+    };
   });
-
 
   const onLoginModalClose = useCallback(async () => {
     setLoginModalOpen(false);
@@ -165,7 +171,7 @@ const NewChatPage = (props) => {
 
   useEffect(() => {
     updateSelectedLesson(lessonId);
-  }, [lessonId]);
+  }, [lessonId, updateSelectedLesson]);
 
   const onChapterUpdate = useCallback(
     ({ id, status, status_value }) => {
@@ -221,11 +227,11 @@ const NewChatPage = (props) => {
   }, [onFeedbackModalOpen]);
 
   useEffect(() => {
-    if (initialized) {
+    console.log('loadData hasCheckLogin', hasCheckLogin)
+    if (hasCheckLogin) {
       loadData();
     }
-  }, [initialized, language]);
-
+  }, [hasCheckLogin, loadData]);
 
   useEffect(() => {
     setLanguage(i18n.language);

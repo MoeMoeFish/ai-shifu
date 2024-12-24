@@ -124,6 +124,8 @@ export const useUserStore = create(
       await userInfoStore.set(res.data);
       i18n.changeLanguage(res.data.language);
 
-    }
+    },
+
+    updateHasCheckLogin: (hasCheckLogin) => set(() => ({ hasCheckLogin })),
   }))
 );

@@ -3,10 +3,11 @@ import { Button } from 'antd';
 import { TrophyTwoTone } from '@ant-design/icons';
 import MainButton from 'ShiNiang/components/MainButton.jsx';
 import styles from './OrderPromotePopoverContent.module.scss';
+import classNames from 'classnames';
 
-const OrderPromotePopoverContent = ({ payload, onCancelButtonClick, onOkButtonClick }) => {
+const OrderPromotePopoverContent = ({ payload, onCancelButtonClick, onOkButtonClick, className }) => {
   return (
-    <div className={styles.orderPromotePopoverContent}>
+    <div className={classNames(styles.orderPromotePopoverContent, className)}>
       <div className={styles.leftColumn}>
         <TrophyTwoTone style={{ fontSize: '1.5em' }} twoToneColor="#E99D42" />
       </div>
