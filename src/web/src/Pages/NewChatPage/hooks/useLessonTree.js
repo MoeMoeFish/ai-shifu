@@ -6,20 +6,8 @@ import { useTracking, EVENT_NAMES } from "common/hooks/useTracking.js";
 import { useUserStore } from 'stores/useUserStore.js';
 import { useEnvStore } from 'stores/envStore.js';
 import { useCallback } from "react";
-export const checkChapterCanLearning = ({ status }) => {
-  return status === LESSON_STATUS_VALUE.LEARNING || status === LESSON_STATUS_VALUE.COMPLETED || status === LESSON_STATUS_VALUE.PREPARE_LEARNING;
-};
-
-export const checkChapterAvaiableStatic = (tree, chapterId) => {
-  const catalog = tree.catalogs.find(v => v.id === chapterId);
-
-
-
-  if (!catalog) {
-    return false;
-  }
-
-  return catalog.status_value === LESSON_STATUS_VALUE.LEARNING || catalog.status_value === LESSON_STATUS_VALUE.COMPLETED || catalog.status_value === LESSON_STATUS_VALUE.PREPARE_LEARNING;
+export const checkChapterCanLearning = ({ status, status_value }) => {
+  return status_value === LESSON_STATUS_VALUE.LEARNING || status_value === LESSON_STATUS_VALUE.COMPLETED || status_value === LESSON_STATUS_VALUE.PREPARE_LEARNING;
 };
 
 const getCurrElementStatic = async (tree) => {
@@ -99,6 +87,8 @@ export const useLessonTree = () => {
       lessonCount,
       bannerInfo: treeData.banner_info,
     };
+
+    console.log('load tree', newTree);
     return newTree;
   }, [checkLogin, updateCourseId]);
 
@@ -324,7 +314,6 @@ export const useLessonTree = () => {
     updateSelectedLesson,
     setCurrCatalog,
     toggleCollapse,
-    checkChapterAvaiableStatic,
     getCurrElement,
     updateLesson,
     updateChapterStatus,

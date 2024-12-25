@@ -37,7 +37,6 @@ import { smoothScroll } from 'Utils/smoothScroll.js';
 import { useTranslation } from 'react-i18next';
 import { useEnvStore } from 'stores/envStore.js';
 import { shifu } from 'Service/Shifu.js';
-import { use } from 'react';
 
 const USER_ROLE = {
   TEACHER: '老师',
@@ -185,9 +184,8 @@ export const ChatComponents = forwardRef(
     const [autoScroll, setAutoScroll] = useState(true);
     const [askMode, setAskMode] = useState(false);
     const { userInfo, mobileStyle } = useContext(AppContext);
-
-
     const chatRef = useRef();
+
     const {
       lessonId: currLessonId,
       changeCurrLesson,
@@ -332,6 +330,26 @@ export const ChatComponents = forwardRef(
           }
 
           try {
+            if (
+              response.type !== RESP_EVENT_TYPE.CHAPTER_UPDATE &&
+              response.type !== RESP_EVENT_TYPE.LESSON_UPDATE &&
+              response.type !== RESP_EVENT_TYPE.TEXT &&
+              response.type !== RESP_EVENT_TYPE.PROFILE_UPDATE &&
+              response.type !== RESP_EVENT_TYPE.ORDER_SUCCESS
+            ) {
+              const newLessonId = response.lesson_id;
+              if (!newLessonId) {
+                return;
+              }
+              if (newLessonId === messageLessonId) {
+                const msg = createMessage({
+                  id: `lesson-${newLessonId}`,
+                  type: CHAT_MESSAGE_TYPE.LESSON_SEPARATOR,
+                  content: { lessonId: newLessonId },
+                });
+                appendMsg(msg);
+              }
+            }
             if (response.type === RESP_EVENT_TYPE.TEXT) {
               if (isEnd) {
                 return;
@@ -532,12 +550,13 @@ export const ChatComponents = forwardRef(
           const newLessonId = v.lesson_id;
           if (newLessonId !== lessonId) {
             lessonId = newLessonId;
-            setMessageLessonId(newLessonId);
-            appendMsg(convertMessage({
-              ...v,
-              id: `lesson-${newLessonId}`,
-              script_type: CHAT_MESSAGE_TYPE.LESSON_SEPARATOR,
-            }));
+            appendMsg(
+              convertMessage({
+                ...v,
+                id: `lesson-${newLessonId}`,
+                script_type: CHAT_MESSAGE_TYPE.LESSON_SEPARATOR,
+              })
+            );
           }
           const newMessage = convertMessage(
             {
@@ -550,6 +569,8 @@ export const ChatComponents = forwardRef(
           );
           appendMsg(newMessage);
         });
+
+        setMessageLessonId(lessonId);
 
         setLessonId(records[records.length - 1].lesson_id);
       }

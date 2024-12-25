@@ -31,7 +31,9 @@ const NewChatPage = (props) => {
   const { frameLayout, updateFrameLayout } = useUiLayoutStore((state) => state);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const { hasLogin, userInfo, checkLogin, hasCheckLogin } = useUserStore((state) => state);
+  const { hasLogin, userInfo, checkLogin, hasCheckLogin } = useUserStore(
+    (state) => state
+  );
   const [language, setLanguage] = useState(userInfo?.language || 'en-US');
 
   const {
@@ -92,8 +94,7 @@ const NewChatPage = (props) => {
     updateCourse();
   }, [courseId, updateCourseId]);
 
-
-  const fetchData = useCallback( async () => {
+  const fetchData = useCallback(async () => {
     if (tree) {
       const data = await getCurrElementStatic(tree);
       if (data) {
@@ -227,7 +228,7 @@ const NewChatPage = (props) => {
   }, [onFeedbackModalOpen]);
 
   useEffect(() => {
-    console.log('loadData hasCheckLogin', hasCheckLogin)
+    console.log('loadData hasCheckLogin', hasCheckLogin);
     if (hasCheckLogin) {
       loadData();
     }
