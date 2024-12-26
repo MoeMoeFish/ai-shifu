@@ -25,6 +25,7 @@ import FeedbackModal from './Components/FeedbackModal/FeedbackModal.jsx';
 import { useTranslation } from 'react-i18next';
 import { useEnvStore } from 'stores/envStore.js';
 import { shifu } from 'Service/Shifu.js';
+import { EVENT_NAMES, events } from './events.js';
 
 // the main page of course learning
 const NewChatPage = (props) => {
@@ -200,11 +201,22 @@ const NewChatPage = (props) => {
       return;
     }
     changeCurrLesson(id);
-    setTimeout(() => {
-      if (chapter.id !== chapterId) {
-        setCid(chapter.id);
-      }
-    }, 0);
+    if (chapter.id !== chapterId) {
+      setCid(chapter.id);
+    }
+
+    if (lessonId === id) {
+      return;
+    }
+
+    events.dispatchEvent(
+      new CustomEvent(EVENT_NAMES.GO_TO_NAVIGATION_NODE, {
+        detail: {
+          chapterId: chapter.id,
+          lessonId: id,
+        },
+      })
+    );
 
     if (mobileStyle) {
       onNavClose();

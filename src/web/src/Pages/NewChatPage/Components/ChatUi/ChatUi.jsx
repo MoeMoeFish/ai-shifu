@@ -12,6 +12,7 @@ import { memo } from 'react';
  */
 export const ChatUi = ({
   chapterId,
+  lessonId,
   lessonUpdate,
   onGoChapter,
   onPurchased,
@@ -32,6 +33,7 @@ export const ChatUi = ({
       {
         <ChatComponents
           chapterId={chapterId}
+          lessonId={lessonId}
           lessonUpdate={lessonUpdate}
           onGoChapter={onGoChapter}
           className={styles.chatComponents}

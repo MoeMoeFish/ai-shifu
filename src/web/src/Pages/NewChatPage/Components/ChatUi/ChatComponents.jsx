@@ -37,6 +37,10 @@ import { smoothScroll } from 'Utils/smoothScroll.js';
 import { useTranslation } from 'react-i18next';
 import { useEnvStore } from 'stores/envStore.js';
 import { shifu } from 'Service/Shifu.js';
+import {
+  events,
+  EVENT_NAMES as BZ_EVENT_NAMES,
+} from 'Pages/NewChatPage/events.js';
 
 const USER_ROLE = {
   TEACHER: '老师',
@@ -161,6 +165,7 @@ export const ChatComponents = forwardRef(
       lessonUpdate,
       onGoChapter = (id) => {},
       chapterId,
+      lessonId,
       onPurchased,
       chapterUpdate,
     },
@@ -170,7 +175,7 @@ export const ChatComponents = forwardRef(
     const { trackEvent, trackTrailProgress } = useTracking();
     const { courseId } = useEnvStore.getState();
     const chatId = courseId;
-    const [lessonId, setLessonId] = useState(null);
+
     const [inputDisabled, setInputDisabled] = useState(false);
     const [inputModal, setInputModal] = useState(null);
     const [_, setLessonEnd] = useState(false);
@@ -183,6 +188,15 @@ export const ChatComponents = forwardRef(
     const [messageLessonId, setMessageLessonId] = useState('');
     const [autoScroll, setAutoScroll] = useState(true);
     const [askMode, setAskMode] = useState(false);
+
+    // action control is register in plugin
+    const [showActionControl, setShowActionControl] = useState(false);
+    const [actionControlType, setActionControlType] = useState('');
+    const [actionControlPayload, setActionControlPayload] = useState({
+      type: '',
+      val: '',
+      scriptId: '',
+    });
     const { userInfo, mobileStyle } = useContext(AppContext);
     const chatRef = useRef();
 
@@ -229,15 +243,6 @@ export const ChatComponents = forwardRef(
       setInputDisabled(false);
     }, [onLoginModalClose]);
 
-    // action control is register in plugin
-    const [showActionControl, setShowActionControl] = useState(false);
-    const [actionControlType, setActionControlType] = useState('');
-    const [actionControlPayload, setActionControlPayload] = useState({
-      type: '',
-      val: '',
-      scriptId: '',
-    });
-
     const closeActionControl = useCallback(() => {
       setShowActionControl(false);
     }, []);
@@ -257,10 +262,6 @@ export const ChatComponents = forwardRef(
         ></Control>
       );
     };
-
-    useEffect(() => {
-      setLessonId(currLessonId);
-    }, [currLessonId, lessonId]);
 
     const initLoadedInteraction = useCallback((ui) => {
       const nextInputModal = convertEventInputModal(ui);
@@ -291,7 +292,7 @@ export const ChatComponents = forwardRef(
         }
 
         if (content.status_value === LESSON_STATUS_VALUE.LEARNING && !isEnd) {
-          setLessonId(content.lesson_id);
+          // TODO: change LessonId
           changeCurrLesson(content.lesson_id);
         }
       },
@@ -494,20 +495,41 @@ export const ChatComponents = forwardRef(
       [stopAutoScroll, startAutoScroll]
     );
 
-    const scrollTo = useCallback((height, stopScroll) => {
-      if (stopScroll) {
-        stopAutoScroll();
-      }
-      
-      const wrapper = chatRef.current?.querySelector(
-        `.${styles.chatComponents} .PullToRefresh`
-      );
+    const scrollTo = useCallback(
+      (height, stopScroll = false) => {
+        if (stopScroll) {
+          stopAutoScroll();
+        }
 
-      if (!wrapper) {
-        return;
-      }
-      smoothScroll({ el: wrapper, to: height });
-    }, [stopAutoScroll]);
+        const wrapper = chatRef.current?.querySelector(
+          `.${styles.chatComponents} .PullToRefresh`
+        );
+
+        if (!wrapper) {
+          return;
+        }
+        smoothScroll({ el: wrapper, to: height });
+      },
+      [stopAutoScroll]
+    );
+
+    const scrollToLesson = useCallback(
+      (lessonId) => {
+        if (!chatRef.current) {
+          return;
+        }
+
+        const lessonNode = chatRef.current.querySelector(
+          `[data-id=lesson-${lessonId}]`
+        );
+        if (!lessonNode) {
+          return;
+        }
+
+        scrollTo(lessonNode.offsetTop, true);
+      },
+      [scrollTo]
+    );
 
     const scrollToBottom = useCallback(() => {
       const inner = chatRef.current?.querySelector(
@@ -591,8 +613,6 @@ export const ChatComponents = forwardRef(
         });
 
         setMessageLessonId(lessonId);
-
-        setLessonId(records[records.length - 1].lesson_id);
       }
 
       if (ui) {
@@ -838,6 +858,31 @@ export const ChatComponents = forwardRef(
       await refreshUserInfo();
       handleSend(INTERACTION_OUTPUT_TYPE.LOGIN, t('chat.loginSuccess'));
     }, [handleSend, refreshUserInfo, t]);
+
+    useEffect(() => {
+      const onGoToNavigationNode = (e) => {
+        console.log('onGoToNavigationNode', e.detail);
+        const { chapterId, lessonId } = e.detail;
+
+        if (chapterId !== loadedChapterId) {
+          return;
+        }
+
+        scrollToLesson(lessonId);
+      };
+
+      events.addEventListener(
+        BZ_EVENT_NAMES.GO_TO_NAVIGATION_NODE,
+        onGoToNavigationNode
+      );
+
+      return () => {
+        events.removeEventListener(
+          BZ_EVENT_NAMES.GO_TO_NAVIGATION_NODE,
+          onGoToNavigationNode
+        );
+      };
+    }, [loadedChapterId, scrollToLesson]);
 
     return (
       <div
