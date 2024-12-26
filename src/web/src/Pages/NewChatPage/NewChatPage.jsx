@@ -22,6 +22,8 @@ import { useDisclosture } from 'common/hooks/useDisclosture.js';
 import { updateWxcode } from 'Api/user.js';
 
 import FeedbackModal from './Components/FeedbackModal/FeedbackModal.jsx';
+import PayModalM from 'Pages/NewChatPage/Components/Pay/PayModalM.jsx';
+import PayModal from 'Pages/NewChatPage/Components/Pay/PayModal.jsx';
 import { useTranslation } from 'react-i18next';
 import { useEnvStore } from 'stores/envStore.js';
 import { shifu } from 'Service/Shifu.js';
@@ -31,6 +33,7 @@ import { EVENT_NAMES, events } from './events.js';
 const NewChatPage = (props) => {
   const { frameLayout, updateFrameLayout } = useUiLayoutStore((state) => state);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [payModalOpen, setPayModalOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const { hasLogin, userInfo, checkLogin, hasCheckLogin } = useUserStore(
     (state) => state
@@ -70,35 +73,13 @@ const NewChatPage = (props) => {
     initOpen: mobileStyle ? false : true,
   });
 
-  // check the frame layout
-  useEffect(() => {
-    const onResize = () => {
-      const frameLayout = calcFrameLayout('#root');
-      updateFrameLayout(frameLayout);
-    };
-    window.addEventListener('resize', onResize);
-    onResize();
-    return () => {
-      window.removeEventListener('resize', onResize);
-    };
-  }, [updateFrameLayout]);
-
   const { courseId } = useParams();
   const { updateCourseId } = useEnvStore.getState();
-
-  useEffect(() => {
-    const updateCourse = async () => {
-      if (courseId) {
-        await updateCourseId(courseId);
-      }
-    };
-    updateCourse();
-  }, [courseId, updateCourseId]);
 
   const fetchData = useCallback(async () => {
     if (tree) {
       const data = await getCurrElementStatic(tree);
-      if (data) {
+      if (data && data.lesson) {
         changeCurrLesson(data.lesson.id);
         if (data.catalog && (!cid || cid !== data.catalog.id)) {
           setCid(data.catalog.id);
@@ -106,12 +87,6 @@ const NewChatPage = (props) => {
       }
     }
   }, [changeCurrLesson, cid, getCurrElementStatic, tree]);
-
-  useEffect(() => {
-    if (hasCheckLogin) {
-      fetchData();
-    }
-  }, [fetchData, hasCheckLogin]);
 
   const loadData = useCallback(async () => {
     await loadTree();
@@ -125,44 +100,15 @@ const NewChatPage = (props) => {
     setInitialized(true);
   }, [checkLogin]);
 
-  useEffect(() => {
-    if (cid === chapterId) {
-      return;
-    } else if (cid) {
-      updateChapterId(cid);
-    }
-  }, [cid, chapterId, updateChapterId]);
-
-  useEffect(() => {
-    (async () => {
-      if (!hasCheckLogin) {
-        await initAndCheckLogin();
-      }
-    })();
-  }, [hasCheckLogin, initAndCheckLogin]);
-
-  // listen global event
-  useEffect(() => {
-    const eventHandler = () => {
-      setLoginModalOpen(true);
-    };
-    shifu.events.addEventListener(
-      shifu.EventTypes.OPEN_LOGIN_MODAL,
-      eventHandler
-    );
-
-    return () => {
-      shifu.events.removeEventListener(
-        shifu.EventTypes.OPEN_LOGIN_MODAL,
-        eventHandler
-      );
-    };
-  });
-
   const onLoginModalClose = useCallback(async () => {
     setLoginModalOpen(false);
     await loadData();
+    shifu.loginTools.loginModalCancel();
   }, [loadData]);
+
+  const onLoginModalOk = useCallback(async () => {
+    shifu.loginTools.loginModalOk();
+  }, []);
 
   const onLessonUpdate = useCallback(
     (val) => {
@@ -170,10 +116,6 @@ const NewChatPage = (props) => {
     },
     [updateLesson]
   );
-
-  useEffect(() => {
-    updateSelectedLesson(lessonId);
-  }, [lessonId, updateSelectedLesson]);
 
   const onChapterUpdate = useCallback(
     ({ id, status, status_value }) => {
@@ -223,6 +165,85 @@ const NewChatPage = (props) => {
     }
   };
 
+  const onFeedbackClick = useCallback(() => {
+    onFeedbackModalOpen();
+  }, [onFeedbackModalOpen]);
+
+  const _onPayModalCancel = useCallback(() => {
+    setPayModalOpen(false);
+    shifu.payTools.payModalCancel();
+  }, []);
+  const _onPayModalOk = useCallback(() => {
+    setPayModalOpen(false);
+    shifu.payTools.payModalOk();
+  }, []);
+
+  // check the frame layout
+  useEffect(() => {
+    const onResize = () => {
+      const frameLayout = calcFrameLayout('#root');
+      updateFrameLayout(frameLayout);
+    };
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [updateFrameLayout]);
+
+  useEffect(() => {
+    const updateCourse = async () => {
+      if (courseId) {
+        await updateCourseId(courseId);
+      }
+    };
+    updateCourse();
+  }, [courseId, updateCourseId]);
+
+  useEffect(() => {
+    if (hasCheckLogin) {
+      fetchData();
+    }
+  }, [fetchData, hasCheckLogin]);
+
+  useEffect(() => {
+    if (cid === chapterId) {
+      return;
+    } else if (cid) {
+      updateChapterId(cid);
+    }
+  }, [cid, chapterId, updateChapterId]);
+
+  useEffect(() => {
+    (async () => {
+      if (!hasCheckLogin) {
+        await initAndCheckLogin();
+      }
+    })();
+  }, [hasCheckLogin, initAndCheckLogin]);
+
+  // listen global event
+  useEffect(() => {
+    const eventHandler = () => {
+      setLoginModalOpen(true);
+    };
+    shifu.events.addEventListener(
+      shifu.EventTypes.OPEN_LOGIN_MODAL,
+      eventHandler
+    );
+
+    return () => {
+      shifu.events.removeEventListener(
+        shifu.EventTypes.OPEN_LOGIN_MODAL,
+        eventHandler
+      );
+    };
+  });
+
+  useEffect(() => {
+    updateSelectedLesson(lessonId);
+  }, [lessonId, updateSelectedLesson]);
+
   useEffect(() => {
     return useCourseStore.subscribe(
       (state) => state.resetedChapterId,
@@ -234,10 +255,6 @@ const NewChatPage = (props) => {
       }
     );
   });
-
-  const onFeedbackClick = useCallback(() => {
-    onFeedbackModalOpen();
-  }, [onFeedbackModalOpen]);
 
   useEffect(() => {
     console.log('loadData hasCheckLogin', hasCheckLogin);
@@ -286,12 +303,27 @@ const NewChatPage = (props) => {
         </Skeleton>
         {loginModalOpen && (
           <LoginModal
+            onLogin={onLoginModalOk}
             open={loginModalOpen}
             onClose={onLoginModalClose}
             destroyOnClose={true}
             onFeedbackClick={onFeedbackClick}
           />
         )}
+        {payModalOpen &&
+          (mobileStyle ? (
+            <PayModalM
+              open={payModalOpen}
+              onCancel={_onPayModalCancel}
+              onOk={_onPayModalOk}
+            />
+          ) : (
+            <PayModal
+              open={payModalOpen}
+              onCancel={_onPayModalCancel}
+              onOk={_onPayModalOk}
+            />
+          ))}
         {initialized && <TrackingVisit />}
 
         {mobileStyle && (

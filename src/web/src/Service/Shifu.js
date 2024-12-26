@@ -10,7 +10,12 @@ const createShifu = () => {
   const eventHandlers = new EventTarget();
 
   const EventTypes = {
-    OPEN_LOGIN_MODAL: 'open_login_modal',
+    OPEN_LOGIN_MODAL: 'OPEN_LOGIN_MODAL',
+    LOGIN_MODAL_CANCEL: 'LOGIN_MODAL_CANCEL',
+    LOGIN_MODAL_OK: 'LOGIN_MODAL_OK',
+    OPEN_PAY_MODAL: 'OPEN_PAY_MODAL',
+    PAY_MODAL_OK: 'PAY_MODAL_OK',
+    PAY_MODAL_CANCEL: 'PAY_MODAL_CANCEL',
   }
 
   const ControlTypes = {
@@ -56,8 +61,28 @@ const createShifu = () => {
     return type in chatInputActionControls;
   }
 
-  const openLogin = () => {
-    eventHandlers.dispatchEvent(new CustomEvent(EventTypes.OPEN_LOGIN_MODAL));
+  const loginTools = {
+    openLogin: () => {
+      eventHandlers.dispatchEvent(new CustomEvent(EventTypes.OPEN_LOGIN_MODAL));
+    },
+    loginModalCancel: (e) => {
+      eventHandlers.dispatchEvent(new CustomEvent(EventTypes.LOGIN_MODAL_CANCEL, { detail: e }));
+    },
+    loginModalOk: (e) => {
+      eventHandlers.dispatchEvent(new CustomEvent(EventTypes.LOGIN_MODAL_OK, { detail: e }));
+    }
+  }
+
+  const payTools = {
+    openPay: () => {
+      eventHandlers.dispatchEvent(new CustomEvent(EventTypes.OPEN_PAY_MODAL));
+    },
+    payModalCancel: (e) => {
+      eventHandlers.dispatchEvent(new CustomEvent(EventTypes.PAY_MODAL_CANCEL, { detail: e }));
+    },
+    payModalOk: (e) => {
+      eventHandlers.dispatchEvent(new CustomEvent(EventTypes.PAY_MODAL_OK, { detail: e }));
+    }
   }
 
   const stores = {
@@ -74,7 +99,8 @@ const createShifu = () => {
       events: eventHandlers,
       registerChatInputActionControls,
       registerControl,
-      openLogin,
+      loginTools,
+      payTools,
       utils,
     })
   }
@@ -92,7 +118,8 @@ const createShifu = () => {
     hasChatInputActionControls,
     getControl,
     hasControl,
-    openLogin,
+    loginTools,
+    payTools,
     utils,
   }
 }
