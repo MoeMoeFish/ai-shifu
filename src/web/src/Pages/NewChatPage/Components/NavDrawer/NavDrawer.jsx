@@ -15,13 +15,14 @@ import styles from './NavDrawer.module.scss';
 import FeedbackModal from '../FeedbackModal/FeedbackModal.jsx';
 import classNames from 'classnames';
 import { useTracking, EVENT_NAMES } from 'common/hooks/useTracking.js';
-import { getBoolEnv } from 'Utils/envUtils.js'
-
+import { getBoolEnv } from 'Utils/envUtils.js';
 import {
   FRAME_LAYOUT_PAD,
   FRAME_LAYOUT_PAD_INTENSIVE,
   FRAME_LAYOUT_MOBILE,
 } from 'constants/uiConstants';
+import { useDisclosture } from 'common/hooks/useDisclosture.js';
+import MainMenuModal from './MainMenuModal.jsx';
 
 /**
  * 导航栏展示形式
@@ -67,23 +68,24 @@ const NavDrawer = ({
   onGoToSetting = () => {},
   onClose = () => {},
 }) => {
-  const { trackEvent } = useTracking();
-  const { frameLayout, hasLogin, mobileStyle } = useContext(AppContext);
   const [isCollapse, setIsCollapse] = useState(false);
   const [popupModalState, setPopupModalState] = useState(
     POPUP_WINDOW_STATE_CLOSE
   );
 
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [bodyScrollTop, setBodyScrollTop] = useState(0);
   const [bodyHeight, setBodyHeight] = useState(0);
+  const { trackEvent } = useTracking();
+  const { frameLayout, hasLogin, mobileStyle } = useContext(AppContext);
 
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const alwaysShowLessonTree = getBoolEnv('alwaysShowLessonTree');
   const footerRef = useRef(null);
   const bodyRef = useRef(null);
 
-  const onHeaderCloseClick = () => {
-  };
+  const { open: mainModalOpen, onToggle: onMainModalToggle } = useDisclosture();
+
+  const onHeaderCloseClick = () => {};
 
   const onBodyScroll = (e) => {
     setBodyScrollTop(e.target.scrollTop);
@@ -141,13 +143,9 @@ const NavDrawer = ({
         <NavFooter
           ref={footerRef}
           isCollapse={isCollapse}
-          onFilingClick={() => {
+          onClick={() => {
             trackEvent(EVENT_NAMES.NAV_BOTTOM_BEIAN, {});
-            if (popupModalState === POPUP_WINDOW_STATE_FILING) {
-              setPopupModalState(POPUP_WINDOW_STATE_CLOSE);
-            } else {
-              setPopupModalState(POPUP_WINDOW_STATE_FILING);
-            }
+            onMainModalToggle();
           }}
           onThemeClick={() => {
             trackEvent(EVENT_NAMES.NAV_BOTTOM_SKIN, {});
@@ -165,6 +163,10 @@ const NavDrawer = ({
               setPopupModalState(POPUP_WINDOW_STATE_SETTING);
             }
           }}
+        />
+        <MainMenuModal
+          open={mainModalOpen}
+          className={popupWindowClassname()}
         />
         <FillingModal
           open={popupModalState === POPUP_WINDOW_STATE_FILING}

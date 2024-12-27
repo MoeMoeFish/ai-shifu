@@ -9,7 +9,7 @@ import filingIcon from 'Assets/newchat/light/icon16-filing.png';
 import { useUserStore } from 'stores/useUserStore.js';
 import { useTranslation } from 'react-i18next';
 
-export const NavFooter = forwardRef(({ isCollapse = false }) => {
+export const NavFooter = forwardRef(({ onClick, isCollapse = false }) => {
   const { t } = useTranslation();
   const { hasLogin, userInfo } = useUserStore((state) => state);
 
@@ -21,6 +21,7 @@ export const NavFooter = forwardRef(({ isCollapse = false }) => {
         styles.navFooter,
         isCollapse ? styles.collapse : ''
       )}
+      onClick={onClick}
     >
       <div className={styles.userSection}>
         <Avatar className={styles.avatar} src={avatar} size={32} />
