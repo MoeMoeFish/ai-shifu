@@ -1,4 +1,5 @@
 import { Button, Modal, QRCode, message } from 'antd';
+import { useShallow } from 'zustand/react/shallow';
 import { memo, useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './PayModal.module.scss';
@@ -65,8 +66,8 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState('');
-
-  const { hasLogin } = useUserStore((state) => state);
+ 
+  const { hasLogin } = useUserStore(useShallow((state) => ({ hasLogin: state.hasLogin})));
 
   useInterval(async () => {
     if (countDwon <= 0) {
@@ -154,8 +155,9 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
   }, [isLoading, isTimeout]);
 
   const onLoginButtonClick = useCallback(() => {
+    onCancel?.();
     shifu.loginTools.openLogin();
-  }, []);
+  }, [onCancel]);
 
   useEffect(() => {
     if (!open) {

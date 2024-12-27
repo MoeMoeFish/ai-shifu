@@ -1,4 +1,5 @@
-import { memo, useState } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import ModalM from 'Components/m/ModalM.jsx';
 import styles from './PayModalM.module.scss';
 import classNames from 'classnames';
@@ -16,14 +17,12 @@ import {
 } from './constans.js';
 import MainButtonM from 'Components/m/MainButtonM.jsx';
 import payInfoBg from 'Assets/newchat/pay-info-bg-m.png';
-import { useEffect } from 'react';
 
 import { getPayUrl, initOrder, applyDiscountCode } from 'Api/order.js';
 import { useWechat } from 'common/hooks/useWechat.js';
 import { message } from 'antd';
 import { inWechat } from 'constants/uiConstants.js';
 import { useDisclosture } from 'common/hooks/useDisclosture.js';
-import { useCallback } from 'react';
 import { SettingInputM } from 'Components/m/SettingInputM.jsx';
 import PayModalFooter from './PayModalFooter.jsx';
 import contactBzWechatImg from 'Assets/newchat/contact-bz-wechat.png';
@@ -72,7 +71,7 @@ export const PayModalM = ({ open = false, onCancel, onOk }) => {
     onOpen: onCouponCodeModalOpen,
   } = useDisclosture();
   const courseId = getStringEnv('courseId');
-  const { hasLogin } = useUserStore((state) => state);
+  const { hasLogin } = useUserStore(useShallow((state) => ({ hasLogin: state.hasLogin})));
 
   const handlePay = useCallback(async () => {
     const { data: qrcodeResp } = await getPayUrl({
@@ -126,8 +125,9 @@ export const PayModalM = ({ open = false, onCancel, onOk }) => {
   }, [couponCode, messageApi, onCouponCodeModalClose, onOk, orderId]);
 
   const onLoginButtonClick = useCallback(() => {
+    onCancel?.();
     shifu.loginTools.openLogin();
-  }, []);
+  }, [onCancel]);
 
   useEffect(() => {
     (async () => {

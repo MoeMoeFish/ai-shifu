@@ -6,11 +6,14 @@ import { customEvents, EVENT_TYPE } from 'ShiNiang/events/event.js';
 import { useState } from 'react';
 import { shifu } from 'ShiNiang/config/config';
 import { usePayStore } from 'ShiNiang/stores/usePayStore.js';
-
-const NonBlockPayControl = ({ onClose, payload, onComplete }) => {
+const NonBlockPayControl = ({ payload, onComplete, onClose }) => {
   const [isShow, setIsShow] = useState(true);
   const { updateHasPay } = usePayStore(
     useShallow((state) => ({ updateHasPay: state.updateHasPay }))
+  );
+
+  const { hasLogin } = shifu.stores.useUserStore(
+    useShallow((state) => ({ hasLogin: state.hasLogin }))
   );
 
   const onPayModalOk = () => {
@@ -20,11 +23,16 @@ const NonBlockPayControl = ({ onClose, payload, onComplete }) => {
 
   const onNonBlockPayModalClose = () => {
     console.log('onNonBlockPayModalClose');
+    if (!hasLogin) {
+      onClose?.();
+      return;
+    }
+
     customEvents.dispatchEvent(
       new CustomEvent(EVENT_TYPE.NON_BLOCK_PAY_MODAL_CLOSED, { detail: {} })
     );
     onComplete?.(payload.type, payload.val, payload.scriptId);
-    onClose();
+    onClose?.();
   };
 
   return (
