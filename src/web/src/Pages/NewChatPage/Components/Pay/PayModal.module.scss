@@ -89,6 +89,13 @@
       justify-content: center;
     }
 
+    .loginButtonWrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2em 0;
+    }
+
     .channelSwitchWrapper {
       margin-top: 20px;
       flex-flow: column nowrap;

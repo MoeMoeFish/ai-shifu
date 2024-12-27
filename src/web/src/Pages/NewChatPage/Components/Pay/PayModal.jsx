@@ -1,11 +1,9 @@
-import { Button, Modal } from 'antd';
-import { useCallback } from 'react';
-import { memo, useState } from 'react';
+import { Button, Modal, QRCode, message } from 'antd';
+import { memo, useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './PayModal.module.scss';
 import { useDisclosture } from 'common/hooks/useDisclosture.js';
 import CouponCodeModal from './CouponCodeModal.jsx';
-import { QRCode } from 'antd';
 import { ORDER_STATUS, PAY_CHANNEL_WECHAT } from './constans.js';
 import {
   getPayUrl,
@@ -13,16 +11,16 @@ import {
   queryOrder,
   applyDiscountCode,
 } from 'Api/order.js';
-import { useEffect } from 'react';
 import classNames from 'classnames';
 import { useInterval } from 'react-use';
-import { message } from 'antd';
 import contactBzWechatImg from 'Assets/newchat/contact-bz-wechat.png';
-
 import payInfoBg from 'Assets/newchat/pay-info-bg.png';
 import PayModalFooter from './PayModalFooter.jsx';
 import PayChannelSwitch from './PayChannelSwitch.jsx';
 import { getStringEnv } from 'Utils/envUtils';
+import MainButton from 'Components/MainButton.jsx';
+import { useUserStore } from 'stores/useUserStore.js';
+import { shifu } from 'Service/Shifu.js';
 
 const DEFAULT_QRCODE = 'DEFAULT_QRCODE';
 const MAX_TIMEOUT = 1000 * 60 * 3;
@@ -68,6 +66,8 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState('');
 
+  const { hasLogin } = useUserStore((state) => state);
+
   useInterval(async () => {
     if (countDwon <= 0) {
       setIsTimeout(true);
@@ -90,9 +90,7 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
 
   const refreshOrderQrcode = useCallback(
     async (orderId) => {
-
-
-      if (orderId){
+      if (orderId) {
         const { data: qrcodeResp } = await getPayUrl({
           channel: payChannel,
           orderId,
@@ -155,6 +153,10 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
     return 'active';
   }, [isLoading, isTimeout]);
 
+  const onLoginButtonClick = useCallback(() => {
+    shifu.loginTools.openLogin();
+  }, []);
+
   useEffect(() => {
     if (!open) {
       return;
@@ -190,7 +192,6 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
       }
       refreshOrderQrcode();
       onCouponCodeModalClose();
-
     },
     [messageApi, onCouponCodeModalClose, orderId, refreshOrderQrcode]
   );
@@ -237,35 +238,47 @@ export const PayModal = ({ open = false, onCancel, onOk }) => {
                   已节省： {discount || '0.00'}
                 </div>
               </div>
-              <div className={styles.qrcodeWrapper}>
-                <QRCode
-                  size={175}
-                  value={qrUrl}
-                  status={getQrcodeStatus()}
-                  onRefresh={onQrcodeRefresh}
-                  bordered={false}
-                />
-              </div>
-              <div className={styles.channelSwitchWrapper}>
-                <PayChannelSwitch
-                  channel={payChannel}
-                  onChange={onPayChannelSelectChange}
-                />
-                <div className={styles.channelDesc}>
-                  现已支持{' '}
-                  <span style={{ fontWeight: 'bold' }}>微信 & 支付宝</span>{' '}
-                  扫码支付
+              {hasLogin ? (
+                <>
+                  <div className={styles.qrcodeWrapper}>
+                    <QRCode
+                      size={175}
+                      value={qrUrl}
+                      status={getQrcodeStatus()}
+                      onRefresh={onQrcodeRefresh}
+                      bordered={false}
+                    />
+                  </div>
+                  <div className={styles.channelSwitchWrapper}>
+                    <PayChannelSwitch
+                      channel={payChannel}
+                      onChange={onPayChannelSelectChange}
+                    />
+                    <div className={styles.channelDesc}>
+                      现已支持{' '}
+                      <span style={{ fontWeight: 'bold' }}>微信 & 支付宝</span>{' '}
+                      扫码支付
+                    </div>
+                  </div>
+                  <div className={styles.couponCodeWrapper}>
+                    <Button
+                      type="link"
+                      onClick={onCouponCodeClick}
+                      className={styles.couponCodeButton}
+                    >
+                      {!couponCode
+                        ? t('groupon.grouponUse')
+                        : t('groupon.grouponModify')}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div class={styles.loginButtonWrapper}>
+                  <MainButton onClick={onLoginButtonClick}>
+                    登录立享优惠
+                  </MainButton>
                 </div>
-              </div>
-              <div className={styles.couponCodeWrapper}>
-                <Button
-                  type="link"
-                  onClick={onCouponCodeClick}
-                  className={styles.couponCodeButton}
-                >
-                  {!couponCode ? t('groupon.grouponUse') : t('groupon.grouponModify')}
-                </Button>
-              </div>
+              )}
               <PayModalFooter />
             </div>
           )}
