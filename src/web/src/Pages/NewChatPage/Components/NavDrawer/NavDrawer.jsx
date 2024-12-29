@@ -83,7 +83,7 @@ const NavDrawer = ({
   const footerRef = useRef(null);
   const bodyRef = useRef(null);
 
-  const { open: mainModalOpen, onToggle: onMainModalToggle } = useDisclosture();
+  const { open: mainModalOpen, onToggle: onMainModalToggle, onClose: onMainModalClose } = useDisclosture();
 
   const onHeaderCloseClick = () => {};
 
@@ -105,6 +105,13 @@ const NavDrawer = ({
   const popupWindowClassname = () => {
     return isCollapse ? styles.popUpWindowCollapse : styles.popUpWindowExpand;
   };
+
+  const mainModalCloseHandler = (e) => {
+    if (footerRef.current && footerRef.current.containElement(e.target)) {
+      return;
+    }
+    onMainModalClose();
+  }
 
   return (
     <div
@@ -166,6 +173,7 @@ const NavDrawer = ({
         />
         <MainMenuModal
           open={mainModalOpen}
+          onClose={mainModalCloseHandler}
           className={popupWindowClassname()}
         />
         <FillingModal
