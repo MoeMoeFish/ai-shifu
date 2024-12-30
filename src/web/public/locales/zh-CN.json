@@ -15,6 +15,7 @@
     "confirmLogoutContent": "确认退出登录么？",
     "defaultUserName": "默认名称",
     "notLogin": "未登录",
+    "login": "登录",
     "logout": "退出登录",
     "loginTitle": "登录",
     "loginFeedback": "提交反馈",
@@ -116,7 +117,11 @@
       "completed": "已完成"
     }
   },
-  "shiniang": {
-    
+  "menus": {
+    "navigationMenus": {
+      "basicInfo": "用户信息",
+      "personalInfo": "个性化设置",
+      "language": "语言"
+    }
   }
 }

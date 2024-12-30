@@ -65,16 +65,10 @@ const NavDrawer = ({
   onChapterCollapse = () => {},
   onLessonSelect = () => {},
   onTryLessonSelect = ({ chapterId, lessonId }) => {},
-  onGoToSetting = () => {},
-  onClose = () => {},
 }) => {
   const [isCollapse, setIsCollapse] = useState(false);
-  const [popupModalState, setPopupModalState] = useState(
-    POPUP_WINDOW_STATE_CLOSE
-  );
 
   const [bodyScrollTop, setBodyScrollTop] = useState(0);
-  const [bodyHeight, setBodyHeight] = useState(0);
   const { trackEvent } = useTracking();
   const { frameLayout, hasLogin, mobileStyle } = useContext(AppContext);
 
@@ -85,21 +79,12 @@ const NavDrawer = ({
 
   const { open: mainModalOpen, onToggle: onMainModalToggle, onClose: onMainModalClose } = useDisclosture();
 
-  const onHeaderCloseClick = () => {};
-
   const onBodyScroll = (e) => {
     setBodyScrollTop(e.target.scrollTop);
   }
 
   const onHeaderToggleClick = ({ isCollapse }) => {
     setIsCollapse(isCollapse);
-  };
-
-  const onPopupModalClose = (e) => {
-    if (footerRef.current && footerRef.current.containElement(e.target)) {
-      return;
-    }
-    setPopupModalState(POPUP_WINDOW_STATE_CLOSE);
   };
 
   const popupWindowClassname = () => {
@@ -124,7 +109,6 @@ const NavDrawer = ({
       <div className={styles.navDrawer}>
         <NavHeader
           className={styles.navHeader}
-          onClose={onHeaderCloseClick}
           onToggle={onHeaderToggleClick}
           isCollapse={isCollapse}
           mobileStyle={mobileStyle}
@@ -154,48 +138,11 @@ const NavDrawer = ({
             trackEvent(EVENT_NAMES.NAV_BOTTOM_BEIAN, {});
             onMainModalToggle();
           }}
-          onThemeClick={() => {
-            trackEvent(EVENT_NAMES.NAV_BOTTOM_SKIN, {});
-            if (popupModalState === POPUP_WINDOW_STATE_THEME) {
-              setPopupModalState(POPUP_WINDOW_STATE_CLOSE);
-            } else {
-              setPopupModalState(POPUP_WINDOW_STATE_THEME);
-            }
-          }}
-          onSettingsClick={() => {
-            trackEvent(EVENT_NAMES.NAV_BOTTOM_SETTING, {});
-            if (popupModalState === POPUP_WINDOW_STATE_SETTING) {
-              setPopupModalState(POPUP_WINDOW_STATE_CLOSE);
-            } else {
-              setPopupModalState(POPUP_WINDOW_STATE_SETTING);
-            }
-          }}
         />
         <MainMenuModal
           open={mainModalOpen}
           onClose={mainModalCloseHandler}
           className={popupWindowClassname()}
-        />
-        <FillingModal
-          open={popupModalState === POPUP_WINDOW_STATE_FILING}
-          className={popupWindowClassname()}
-          onClose={onPopupModalClose}
-          onFeedbackClick={() => {
-            setFeedbackModalOpen(true);
-          }}
-        />
-        <ThemeWindow
-          open={popupModalState === POPUP_WINDOW_STATE_THEME}
-          className={popupWindowClassname()}
-          onClose={onPopupModalClose}
-        />
-        <SettingModal
-          open={popupModalState === POPUP_WINDOW_STATE_SETTING}
-          className={popupWindowClassname()}
-          onClose={onPopupModalClose}
-          onLoginClick={onLoginClick}
-          onGoToSetting={onGoToSetting}
-          onNavClose={onClose}
         />
         <FeedbackModal
           open={feedbackModalOpen}

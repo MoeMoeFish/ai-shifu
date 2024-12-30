@@ -1,5 +1,5 @@
 import { memo, useRef } from 'react';
-import { Dropdown } from 'antd';
+import { Dropdown, Modal } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import classNames from 'classnames';
 import styles from './MainMenuModal.module.scss';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { languages } from 'Service/constants.js';
 import { useUserStore } from 'stores/useUserStore.js';
 import { DownOutlined } from '@ant-design/icons';
+import { shifu } from 'Service/Shifu.js';
 
 const MainMenuModal = ({
   open,
@@ -16,13 +17,14 @@ const MainMenuModal = ({
   className = '',
 }) => {
   const htmlRef = useRef(null);
-  const { hasLogin } = useUserStore(
+  const { hasLogin, logout } = useUserStore(
     useShallow((state) => ({
+      logout: state.logout,
       hasLogin: state.hasLogin,
     }))
   );
 
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const languageDrowdownContainer = (triggerNode) => {
     if (htmlRef.current) {
       return htmlRef.current;
@@ -43,15 +45,30 @@ const MainMenuModal = ({
 
   const onUserInfoClick = () => {
     if (!hasLogin) {
-
+      shifu.loginTools.openLogin();
     }
   };
 
-  const onPersonalInfoClick = () => {};
+  const onPersonalInfoClick = () => {
+    if (!hasLogin) {
+      shifu.loginTools.openLogin();
+    }
+  };
 
-  const onLoginClick = () => {};
+  const onLoginClick = () => {
+    shifu.loginTools.openLogin();
+  };
 
-  const onLogoutClick = () => {};
+  const onLogoutClick = async () => {
+    await Modal.confirm({
+      title: t('user.confirmLogoutTitle'),
+      content: t('user.confirmLogoutContent'),
+      onOk: async () => {
+        await logout();
+        window.location.reload();
+      },
+    });
+  };
 
   return (
     <PopupModal
@@ -67,7 +84,7 @@ const MainMenuModal = ({
             src={require('@Assets/newchat/light/icon16-course-list.png')}
             alt=""
           />
-          <div className={styles.rowTitle}>个人信息</div>
+          <div className={styles.rowTitle}>{t('menus.navigationMenus.basicInfo')}</div>
         </div>
         <div className={styles.mainMenuModalRow} onClick={onPersonalInfoClick}>
           <img
@@ -75,7 +92,7 @@ const MainMenuModal = ({
             src={require('@Assets/newchat/light/icon16-course-list.png')}
             alt=""
           />
-          <div className={styles.rowTitle}>个性化设置</div>
+          <div className={styles.rowTitle}>{t('menus.navigationMenus.personalInfo')}</div>
         </div>
         <div
           className={classNames(styles.mainMenuModalRow, styles.languageRow)}
@@ -86,7 +103,7 @@ const MainMenuModal = ({
               src={require('@Assets/newchat/light/icon16-course-list.png')}
               alt=""
             />
-            <div className={styles.rowTitle}>语言</div>
+            <div className={styles.rowTitle}>{t('menus.navigationMenus.language')}</div>
           </div>
           <div className={styles.languageRowRight}>
             <Dropdown
@@ -112,7 +129,7 @@ const MainMenuModal = ({
               src={require('@Assets/newchat/light/icon16-course-list.png')}
               alt=""
             />
-            <div className={styles.rowTitle}>登录</div>
+            <div className={styles.rowTitle}>{t('user.login')}</div>
           </div>
         ) : (
           <div className={styles.mainMenuModalRow} onClick={onLogoutClick}>
@@ -121,7 +138,7 @@ const MainMenuModal = ({
               src={require('@Assets/newchat/light/icon16-course-list.png')}
               alt=""
             />
-            <div className={styles.rowTitle}>退出登录</div>
+            <div className={styles.rowTitle}>{t('user.logout')}</div>
           </div>
         )}
       </div>

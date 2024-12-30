@@ -1,6 +1,6 @@
 export const languages = [
   {
-    value: 'zh',
+    value: 'zh-CN',
     label: '中文',
   },
   {
