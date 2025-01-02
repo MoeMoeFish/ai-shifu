@@ -39,6 +39,7 @@ const NewChatPage = (props) => {
     (state) => state
   );
   const [language, setLanguage] = useState(userInfo?.language || 'en-US');
+  const [userSettingBasicInfo, setUserSettingBasicInfo] = useState(false);
 
   const {
     tree,
@@ -133,7 +134,13 @@ const NewChatPage = (props) => {
     reloadTree();
   }, [reloadTree]);
 
-  const onGoToSetting = useCallback(() => {
+  const onGoToSettingBasic = useCallback(() => {
+    setUserSettingBasicInfo(true);
+    setShowUserSettings(true);
+  }, []);
+
+  const onGoToSettingPersonal = useCallback(() => {
+    setUserSettingBasicInfo(false);
     setShowUserSettings(true);
   }, []);
 
@@ -284,9 +291,10 @@ const NewChatPage = (props) => {
               lessonTree={tree}
               onChapterCollapse={toggleCollapse}
               onLessonSelect={onLessonSelect}
-              onGoToSetting={onGoToSetting}
               onTryLessonSelect={onTryLessonSelect}
               onClose={onNavClose}
+              onBasicInfoClick={onGoToSettingBasic}
+              onPersonalInfoClick={onGoToSettingPersonal}
             />
           )}
           {
@@ -298,6 +306,7 @@ const NewChatPage = (props) => {
               showUserSettings={showUserSettings}
               onUserSettingsClose={() => setShowUserSettings(false)}
               chapterUpdate={onChapterUpdate}
+              userSettingBasicInfo={userSettingBasicInfo}
             />
           }
         </Skeleton>

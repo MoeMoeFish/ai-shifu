@@ -65,6 +65,8 @@ const NavDrawer = ({
   onChapterCollapse = () => {},
   onLessonSelect = () => {},
   onTryLessonSelect = ({ chapterId, lessonId }) => {},
+  onBasicInfoClick,
+  onPersonalInfoClick,
 }) => {
   const [isCollapse, setIsCollapse] = useState(false);
 
@@ -77,11 +79,15 @@ const NavDrawer = ({
   const footerRef = useRef(null);
   const bodyRef = useRef(null);
 
-  const { open: mainModalOpen, onToggle: onMainModalToggle, onClose: onMainModalClose } = useDisclosture();
+  const {
+    open: mainModalOpen,
+    onToggle: onMainModalToggle,
+    onClose: onMainModalClose,
+  } = useDisclosture();
 
   const onBodyScroll = (e) => {
     setBodyScrollTop(e.target.scrollTop);
-  }
+  };
 
   const onHeaderToggleClick = ({ isCollapse }) => {
     setIsCollapse(isCollapse);
@@ -96,7 +102,7 @@ const NavDrawer = ({
       return;
     }
     onMainModalClose();
-  }
+  };
 
   return (
     <div
@@ -113,7 +119,11 @@ const NavDrawer = ({
           isCollapse={isCollapse}
           mobileStyle={mobileStyle}
         />
-        <div className={styles.bodyWrapper} onScroll={onBodyScroll} ref={bodyRef} >
+        <div
+          className={styles.bodyWrapper}
+          onScroll={onBodyScroll}
+          ref={bodyRef}
+        >
           {!isCollapse &&
             (hasLogin || alwaysShowLessonTree ? (
               <CourseCatalogList
@@ -143,6 +153,8 @@ const NavDrawer = ({
           open={mainModalOpen}
           onClose={mainModalCloseHandler}
           className={popupWindowClassname()}
+          onBasicInfoClick={onBasicInfoClick}
+          onPersonalInfoClick={onPersonalInfoClick}
         />
         <FeedbackModal
           open={feedbackModalOpen}
@@ -155,4 +167,4 @@ const NavDrawer = ({
   );
 };
 
-export default memo(NavDrawer) ;
+export default memo(NavDrawer);

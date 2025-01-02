@@ -22,9 +22,14 @@ import { useTranslation } from 'react-i18next';
 
 const fixed_keys = ['nickname', 'avatar', 'sex', 'birth'];
 
-export const UserSettings = ({ onHomeClick, className, onClose }) => {
+export const UserSettings = ({
+  onHomeClick,
+  className,
+  onClose,
+  isBasicInfo = false,
+}) => {
   const { refreshUserInfo } = useUserStore((state) => ({
-    refreshUserInfo: state.refreshUserInfo
+    refreshUserInfo: state.refreshUserInfo,
   }));
 
   const { t } = useTranslation();
@@ -152,40 +157,70 @@ export const UserSettings = ({ onHomeClick, className, onClose }) => {
         />
         <div className={styles.settingBody}>
           <div className={styles.centerWrapper}>
-            <ChangeAvatar image={avatar} onChange={onChangeAvatarChanged} />
-            <div className={styles.basicInfoTitle}>{t("settings.basicInfo")}</div>
-            <SettingInputElement
-              title={t("settings.nickname")}
-              placeholder={t("settings.nicknamePlaceholder")}
-              onChange={onNickNameChanged}
-              className={styles.inputUnit}
-              value={nickName}
-              maxLength={10}
-            />
-            <SettingSelectElement
-              title={t("settings.sex")}
-              placeholder={t("settings.sexPlaceholder")}
-              value={sex}
-              className={styles.inputUnit}
-              onClick={onSexSelectClick}
-            />
-            <SettingSelectElement
-              title={t("settings.birth")}
-              placeholder={t("settings.birthPlaceholder")}
-              className={styles.inputUnit}
-              onClick={onBirthClick}
-              value={birth}
-            />
-            {dynFormData.map((item) => {
-              return (
-                <DynamicSettingItem
-                  key={item.key}
-                  settingItem={item}
-                  onChange={onDynamicSettingItemChange}
-                  className={styles.inputUnit}
-                />
-              );
-            })}
+            <div
+              className={
+                isBasicInfo
+                  ? styles.basicInfoWrapper
+                  : styles.basicInfoWrapperHidden
+              }
+            >
+              <ChangeAvatar image={avatar} onChange={onChangeAvatarChanged} />
+              <div className={styles.basicInfoTitle}>
+                {t('settings.basicInfo')}
+              </div>
+              <SettingInputElement
+                title={t('settings.nickname')}
+                placeholder={t('settings.nicknamePlaceholder')}
+                onChange={onNickNameChanged}
+                className={styles.inputUnit}
+                value={nickName}
+                maxLength={10}
+              />
+              <SettingSelectElement
+                title={t('settings.sex')}
+                placeholder={t('settings.sexPlaceholder')}
+                value={sex}
+                className={styles.inputUnit}
+                onClick={onSexSelectClick}
+              />
+              <SettingSelectElement
+                title={t('settings.birth')}
+                placeholder={t('settings.birthPlaceholder')}
+                className={styles.inputUnit}
+                onClick={onBirthClick}
+                value={birth}
+              />
+            </div>
+
+            <div
+              className={
+                isBasicInfo
+                  ? styles.basicInfoWrapperHidden
+                  : styles.basicInfoWrapper
+              }
+            >
+              <div className={classNames(styles.basicInfoTitle)}>
+                {t('settings.personalInfo')}
+              </div>
+              <SettingInputElement
+                title={t('settings.nicknamePersonal')}
+                placeholder={t('settings.nicknamePlaceholder')}
+                onChange={onNickNameChanged}
+                className={styles.inputUnit}
+                value={nickName}
+                maxLength={10}
+              />
+              {dynFormData.map((item) => {
+                return (
+                  <DynamicSettingItem
+                    key={item.key}
+                    settingItem={item}
+                    onChange={onDynamicSettingItemChange}
+                    className={styles.inputUnit}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
         <div className={styles.settingFooter}>

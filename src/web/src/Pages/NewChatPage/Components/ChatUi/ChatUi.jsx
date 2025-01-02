@@ -6,6 +6,7 @@ import UserSettings from '../Settings/UserSettings.jsx';
 import { FRAME_LAYOUT_MOBILE } from 'constants/uiConstants.js';
 import classNames from 'classnames';
 import { memo } from 'react';
+import GlobalInfoButton from './GlobalInfoButton.jsx';
 
 /**
  * 聊天区的整体画布
@@ -17,6 +18,7 @@ export const ChatUi = ({
   onGoChapter,
   onPurchased,
   showUserSettings = true,
+  userSettingBasicInfo = false,
   onUserSettingsClose = () => {},
   onMobileSettingClick = () => {},
   chapterUpdate,
@@ -47,8 +49,11 @@ export const ChatUi = ({
           className={styles.UserSettings}
           onHomeClick={onUserSettingsClose}
           onClose={onUserSettingsClose}
+          isBasicInfo={userSettingBasicInfo}
         />
       )}
+
+      <GlobalInfoButton className={styles.globalInfoButton} />
     </div>
   );
 };

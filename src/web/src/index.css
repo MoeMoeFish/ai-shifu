@@ -53,6 +53,7 @@ body {
   --success-color: #00a27a;
   --warning-color: #fb8b05;
   --fail-color: #eb4157;
+  --hover-color: rgba(0, 0, 0, 0.06);
 }
 
 code {

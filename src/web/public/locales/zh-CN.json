@@ -7,7 +7,11 @@
     "companyAddress": "北京朝阳区望京东煌大厦19层163室",
     "settings": "设置",
     "ok": "确定",
-    "networkError": "无法连接到服务器请检查网络设置"
+    "networkError": "无法连接到服务器请检查网络设置",
+    "shortcut": {
+      "space": "空格",
+      "enter": "回车"
+    }
   },
   "user": {
     "loginMainButton": "登录/注册",
@@ -66,18 +70,22 @@
     "gongan": "京公网安备11010502055644号",
     "feedbackTitle": "提交反馈",
     "userAggrement": "服务协议",
-    "privacyPolicy": "隐私政策"
+    "privacyPolicy": "隐私协议",
+    "contactUs": "联系我们",
+    "shortcut": "快捷键"
   },
   "settings": {
     "home": "主页",
     "settingTite": "个人信息",
     "basicInfo": "基础信息",
     "nickname": "昵称",
+    "nicknamePersonal": "昵称（同时作为个人基本信息）",
     "nicknamePlaceholder": "请输入昵称",
     "sex": "性别",
     "sexPlaceholder": "请选择性别",
     "birth": "生日",
     "birthPlaceholder": "请选择生日",
+    "personalInfo": "个性化设置",
     "dialogTitle": {
       "selectSex": "选择性别",
       "selectBirthday": "选择生日"

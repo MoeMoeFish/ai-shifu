@@ -15,6 +15,8 @@ const MainMenuModal = ({
   onClose = () => {},
   style = {},
   className = '',
+  onBasicInfoClick,
+  onPersonalInfoClick,
 }) => {
   const htmlRef = useRef(null);
   const { hasLogin, logout } = useUserStore(
@@ -46,13 +48,19 @@ const MainMenuModal = ({
   const onUserInfoClick = () => {
     if (!hasLogin) {
       shifu.loginTools.openLogin();
+      return;
     }
+
+    onBasicInfoClick?.();
   };
 
-  const onPersonalInfoClick = () => {
+  const _onPersonalInfoClick = () => {
     if (!hasLogin) {
       shifu.loginTools.openLogin();
+      return;
     }
+
+    onPersonalInfoClick?.();
   };
 
   const onLoginClick = () => {
@@ -81,52 +89,59 @@ const MainMenuModal = ({
         <div className={styles.mainMenuModalRow} onClick={onUserInfoClick}>
           <img
             className={styles.rowIcon}
-            src={require('@Assets/newchat/light/icon16-course-list.png')}
+            src={require('@Assets/newchat/light/userInfo.png')}
             alt=""
           />
-          <div className={styles.rowTitle}>{t('menus.navigationMenus.basicInfo')}</div>
+          <div className={styles.rowTitle}>
+            {t('menus.navigationMenus.basicInfo')}
+          </div>
         </div>
-        <div className={styles.mainMenuModalRow} onClick={onPersonalInfoClick}>
+        <div className={styles.mainMenuModalRow} onClick={_onPersonalInfoClick}>
           <img
             className={styles.rowIcon}
-            src={require('@Assets/newchat/light/icon16-course-list.png')}
+            src={require('@Assets/newchat/light/personal.png')}
             alt=""
           />
-          <div className={styles.rowTitle}>{t('menus.navigationMenus.personalInfo')}</div>
-        </div>
-        <div
-          className={classNames(styles.mainMenuModalRow, styles.languageRow)}
-        >
-          <div className={styles.languageRowLeft}>
-            <img
-              className={styles.rowIcon}
-              src={require('@Assets/newchat/light/icon16-course-list.png')}
-              alt=""
-            />
-            <div className={styles.rowTitle}>{t('menus.navigationMenus.language')}</div>
+          <div className={styles.rowTitle}>
+            {t('menus.navigationMenus.personalInfo')}
           </div>
-          <div className={styles.languageRowRight}>
-            <Dropdown
-              getPopupContainer={languageDrowdownContainer}
-              menu={languageDrowdownMeus}
-            >
-              <div
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                {languages.find((lang) => lang.value === i18n.language)
-                  ?.label || '请选择'}{' '}
-                {<DownOutlined className={style.langDownIcon} />}
+        </div>
+
+        <div className={styles.languageRow}>
+          <div className={classNames(styles.mainMenuModalRow, styles.languageRowInner)}>
+            <div className={styles.languageRowLeft}>
+              <img
+                className={styles.rowIcon}
+                src={require('@Assets/newchat/light/multiLanguage.png')}
+                alt=""
+              />
+              <div className={styles.rowTitle}>
+                {t('menus.navigationMenus.language')}
               </div>
-            </Dropdown>
+            </div>
+            <div className={styles.languageRowRight}>
+              <Dropdown
+                getPopupContainer={languageDrowdownContainer}
+                menu={languageDrowdownMeus}
+              >
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  {languages.find((lang) => lang.value === i18n.language)
+                    ?.label || '请选择'}{' '}
+                  {<DownOutlined className={style.langDownIcon} />}
+                </div>
+              </Dropdown>
+            </div>
           </div>
         </div>
         {!hasLogin ? (
           <div className={styles.mainMenuModalRow} onClick={onLoginClick}>
             <img
               className={styles.rowIcon}
-              src={require('@Assets/newchat/light/icon16-course-list.png')}
+              src={require('@Assets/newchat/light/signin.png')}
               alt=""
             />
             <div className={styles.rowTitle}>{t('user.login')}</div>
@@ -135,7 +150,7 @@ const MainMenuModal = ({
           <div className={styles.mainMenuModalRow} onClick={onLogoutClick}>
             <img
               className={styles.rowIcon}
-              src={require('@Assets/newchat/light/icon16-course-list.png')}
+              src={require('@Assets/newchat/light/signin.png')}
               alt=""
             />
             <div className={styles.rowTitle}>{t('user.logout')}</div>
