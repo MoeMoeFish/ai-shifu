@@ -11,30 +11,46 @@
   border: 0;
 }
 
-.rowIcon {
-  width: 1.1em;
-}
+.popoverContent {
+  width: 250px;
 
+  .globalInfoMenu {
+    &:global(.ant-menu.ant-menu-root.ant-menu-vertical) {
+      border-inline-end: 0;
 
-.policyInfo {
-  font-size: 0.8em;
-  max-width: 280px;
-  padding-top: 1em;
-  border-top: 1px solid var(--color-8);
-  padding-left: 13px;
-  padding-right: 13px;
-
-  .policyInfoRow {
-    margin-top: 0.5em;
+      :global(.ant-menu-item) {
+        padding-inline: 8px;
+      }
+    }
   }
 
-  .gonganRow {
-    display: flex;
-    align-items: center;
+  .rowSep {
+    border-top: 1px solid var(--color-8);
+    margin-inline: 12px;
+  }
 
-    .beianIcon {
-      width: 0.9em;
-      margin-right: 0.2em;
+  .rowIcon {
+    width: 1.1em;
+  }
+
+  .policyInfo {
+    font-size: 0.8em;
+    max-width: 280px;
+    padding-top: 1em;
+    padding-inline: 12px;
+
+    .policyInfoRow {
+      margin-top: 0.5em;
+    }
+
+    .gonganRow {
+      display: flex;
+      align-items: center;
+
+      .beianIcon {
+        width: 0.9em;
+        margin-right: 0.2em;
+      }
     }
   }
 }

@@ -103,7 +103,9 @@ const GlobalInfoButton = ({ className }) => {
         onClose={onPopoverClose}
         content={
           <div className={styles.popoverContent}>
-            <Menu items={menuItems} selectable={false} />
+            <Menu items={menuItems} selectable={false} inlineIndent={0} className={styles.globalInfoMenu} />
+
+            <div className={styles.rowSep}></div>
             <div className={styles.policyInfo}>
               <div className={styles.policyInfoRow}>
                 {t('common.companyName')}

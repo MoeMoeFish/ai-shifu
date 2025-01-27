@@ -48,11 +48,6 @@ export const CourseCatalogList = ({
       <div className={styles.courseCatalogList}>
         <div className={styles.titleRow}>
           <div className={styles.titleArea}>
-            <img
-              className={styles.icon}
-              src={require('@Assets/newchat/light/icon16-course-list.png')}
-              alt={t('navigation.courseList')}
-            />
             <div className={styles.titleName}>{courseName}</div>
           </div>
           {getRightAreaControl()}

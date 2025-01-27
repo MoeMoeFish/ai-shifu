@@ -95,7 +95,7 @@ const NavigatorTitleRightArea = ({ payload }) => {
           open={!shifu.getConfig().mobileStyle && orderPromotePopoverOpen}
           placement={popoverLocation}
         >
-          <ToPayButton onClick={onPayButtonClick}>{payload.title}</ToPayButton>
+          <ToPayButton className={styles.navigatorTitleRightButton} onClick={onPayButtonClick}>{payload.title}</ToPayButton>
         </Popover>
       ) : (
         <></>
