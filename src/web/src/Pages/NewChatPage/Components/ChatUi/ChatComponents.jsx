@@ -831,6 +831,7 @@ export const ChatComponents = forwardRef(
 
     const onLogin = useCallback(async () => {
       await refreshUserInfo();
+      shifu.loginTools.emitLoginModalOk();
       handleSend(INTERACTION_OUTPUT_TYPE.LOGIN, t('chat.loginSuccess'));
     }, [handleSend, refreshUserInfo, t]);
 

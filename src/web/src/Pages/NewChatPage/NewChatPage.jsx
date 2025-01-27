@@ -321,6 +321,24 @@ const NewChatPage = (props) => {
     setLanguage(i18n.language);
   }, [i18n.language]);
 
+  useEffect(() => {
+    const _onLoginModalOk = () => {
+      reloadTree();
+    };
+
+    shifu.events.addEventListener(
+      shifu.EventTypes.LOGIN_MODAL_OK,
+      _onLoginModalOk
+    );
+
+    return () => {
+      shifu.events.removeEventListener(
+        shifu.EventTypes.LOGIN_MODAL_OK,
+        _onLoginModalOk
+      );
+    };
+  }, [reloadTree]);
+
   return (
     <div className={classNames(styles.newChatPage)}>
       <AppContext.Provider
