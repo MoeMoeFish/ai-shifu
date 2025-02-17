@@ -68,6 +68,7 @@
     "web-vitals": "^2.1.4",
     "zustand": "^4.5.5"
   },
+  "main": "src/main.js",
   "scripts": {
     "start:dev": "dotenv -e .local.single.env -e .env craco start",
     "start:dev-local": "dotenv -e .local.single.env -e .env.dev-local craco start",
