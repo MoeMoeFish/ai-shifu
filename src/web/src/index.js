@@ -8,6 +8,11 @@ import { shifu } from 'Service/Shifu.js';
 import 'Utils/pollyfill.js';
 import 'ShiNiang/index.js';
 
+if (window.shifuPlugins) {
+  for (const plugin of window.shifuPlugins) {
+    shifu.installPlugin(plugin);
+  }
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -16,8 +21,3 @@ root.render(
   </BrowserRouter>
 );
 
-if (window.shifuPlugins) {
-  for (const plugin of window.shifuPlugins) {
-    shifu.installPlugin(plugin);
-  }
-}
